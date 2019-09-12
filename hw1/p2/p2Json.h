@@ -11,6 +11,8 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <iomanip>
+#include <limits>
 
 using namespace std;
 
@@ -22,7 +24,7 @@ public:
    JsonElem(const string& k, int v): _key(k), _value(v) {}
 
    friend ostream& operator << (ostream&, const JsonElem&);
-
+   friend class Json;
 private:
    string  _key;   // DO NOT change this definition. Use it to store key.
    int     _value; // DO NOT change this definition. Use it to store value.
@@ -33,10 +35,18 @@ class Json
 public:
    // TODO: define constructor & member functions on your own
    bool read(const string&);
+   void printAll();
+   void printMin();
+   void printMax();
+   void printSum() { cout << "The summation of the values is: " << _sum << ".\n"; }
+   void printAvg() { cout << "The average of the values is: " << fixed << setprecision(1) << (double)_sum / _obj.size() << ".\n"; }
+   bool isEmpty() { if(_obj.empty()) cerr << "Error: No element found!!\n"; return _obj.empty(); }
+   void add();
 
 private:
    vector<JsonElem>       _obj;  // DO NOT change this definition.
                                  // Use it to store JSON elements.
+   int _sum;
 };
 
 #endif // P2_TABLE_H
