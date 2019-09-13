@@ -34,14 +34,16 @@ class Json
 {
 public:
    // TODO: define constructor & member functions on your own
+   Json(): _sum(0) {};
    bool read(const string&);
-   void printAll();
-   void printMin();
-   void printMax();
-   void printSum() { cout << "The summation of the values is: " << _sum << ".\n"; }
-   void printAvg() { cout << "The average of the values is: " << fixed << setprecision(1) << (double)_sum / _obj.size() << ".\n"; }
-   bool isEmpty() { if(_obj.empty()) cerr << "Error: No element found!!\n"; return _obj.empty(); }
-   void add();
+   bool checkArgs(const string&, const size_t&) const;
+   void printAll() const;
+   void printMin() const;
+   void printMax() const;
+   void printSum() const { cout << "The summation of the values is: " << _sum << ".\n"; }
+   void printAvg() const { cout << "The average of the values is: " << fixed << setprecision(1) << (double)_sum / _obj.size() << ".\n"; }
+   bool isEmpty() const { if(_obj.empty()) cerr << "Error: No element found!!\n"; return _obj.empty(); }
+   void add(const string&);
 
 private:
    vector<JsonElem>       _obj;  // DO NOT change this definition.

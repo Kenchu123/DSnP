@@ -29,19 +29,18 @@ int main()
    // TODO read and execute commands
    // cout << "Enter command: ";
 
-   string input, cmd;
-   getline(cin, input);
+
    while (true) {
       cout << "Enter command: ";
-      getline(cin, input);
-      stringstream ss(input);
-      ss >> cmd;
-      if (cmd == "PRINT") json.printAll();
-      else if (cmd == "AVE") { if(!json.isEmpty()) json.printAvg(); }
-      else if (cmd == "SUM") { if(!json.isEmpty()) json.printSum(); }
-      else if (cmd == "MAX") { if(!json.isEmpty()) json.printMax(); }
-      else if (cmd == "MIN") { if(!json.isEmpty()) json.printMin(); }
-      else if (cmd == "ADD") { json.add(); }
+      string cmd = "", args = "";
+      cin >> cmd;
+      getline(cin, args);
+      if (cmd == "PRINT") { if (json.checkArgs(args, 0)) json.printAll(); }
+      else if (cmd == "AVE") { if (!json.isEmpty() && json.checkArgs(args, 0)) json.printAvg(); }
+      else if (cmd == "SUM") { if (!json.isEmpty() && json.checkArgs(args, 0)) json.printSum(); }
+      else if (cmd == "MAX") { if (!json.isEmpty() && json.checkArgs(args, 0)) json.printMax(); }
+      else if (cmd == "MIN") { if (!json.isEmpty() && json.checkArgs(args, 0)) json.printMin(); }
+      else if (cmd == "ADD") { if (json.checkArgs(args, 2)) json.add(args); }
       else if (cmd == "EXIT") exit(1);
       else {
          cerr << "Error: unknown command: \"" << cmd << "\"" << endl;
@@ -51,3 +50,4 @@ int main()
 
 // Todo: Extra argument for all cmd
 // Todo: Illegal argument for cmd ADD
+// Todo: Error Detecting
