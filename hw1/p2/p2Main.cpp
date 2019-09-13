@@ -7,7 +7,6 @@
 ****************************************************************************/
 #include <iostream>
 #include <string>
-#include <sstream>
 #include "p2Json.h"
 
 using namespace std;
@@ -26,10 +25,6 @@ int main()
       exit(-1); // jsonFile does not exist.
    }
 
-   // TODO read and execute commands
-   // cout << "Enter command: ";
-
-
    while (true) {
       cout << "Enter command: ";
       string cmd = "", args = "";
@@ -47,7 +42,3 @@ int main()
       }
    }
 }
-
-// Todo: Extra argument for all cmd
-// Todo: Illegal argument for cmd ADD
-// Todo: Error Detecting
