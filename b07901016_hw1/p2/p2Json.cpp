@@ -97,6 +97,12 @@ void Json::add(const string& args) {
          return;
       }
    }
+   for (auto ele : _obj) {
+      if (ele._key == key) {
+         cerr << "Error: Element with key \"" << key << "\" already exists!!" << endl;
+         return;
+      }
+   }
    try {
       val = stoi(valStr);
       _obj.emplace_back(key, val);
