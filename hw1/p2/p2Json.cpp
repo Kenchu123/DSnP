@@ -91,12 +91,12 @@ void Json::add(const string& args) {
    int val;
    stringstream ss(args);
    ss >> key >> valStr;
-   for (auto ch : key) {
-      if ((ch < '0' || ch > '9') && (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && ch != '_') {
-         cerr << "Error: Illegal argument \"" << key << "\"!!" << endl;
-         return;
-      }
-   }
+   // for (auto ch : key) {
+   //    if ((ch < '0' || ch > '9') && (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && ch != '_') {
+   //       cerr << "Error: Illegal argument \"" << key << "\"!!" << endl;
+   //       return;
+   //    }
+   // }
    for (auto ele : _obj) {
       if (ele._key == key) {
          cerr << "Error: Element with key \"" << key << "\" already exists!!" << endl;

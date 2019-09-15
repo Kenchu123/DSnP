@@ -1,23 +1,26 @@
 Please enter the file name: File "test4.json" was read in successfully.
-Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: {
+Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: Enter command: {
   "hello" : 7122,
+  "\\\\````" : 6789,
   "jizz" : -98765
 }
 Enter command: The minimum element is: { "jizz" : -98765 }.
 Enter command: The maximum element is: { "hello" : 7122 }.
-Enter command: The summation of the values is: -91643.
-Enter command: The average of the values is: -45821.5.
+Enter command: The summation of the values is: -84854.
+Enter command: The average of the values is: -28284.7.
 Enter command: Enter command: {
   "hello" : 7122,
+  "\\\\````" : 6789,
   "jizz" : -98765,
   "23454235" : 243431
 }
 Enter command: The maximum element is: { "23454235" : 243431 }.
 Enter command: The minimum element is: { "jizz" : -98765 }.
-Enter command: The summation of the values is: 151788.
-Enter command: The average of the values is: 50596.0.
+Enter command: The summation of the values is: 158577.
+Enter command: The average of the values is: 39644.2.
 Enter command: {
   "hello" : 7122,
+  "\\\\````" : 6789,
   "jizz" : -98765,
   "23454235" : 243431
 }

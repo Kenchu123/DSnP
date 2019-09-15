@@ -6,9 +6,12 @@ SUM
 AVE
 ADD hello 7122
 ADD hello 7555
-ADD hello sdf sasfa
+ADD hellos 123 sasfa gyujnbg
+ADD www2 sadsf
+ADD \\\\```` 6789
 ADD jizz -98765
-ADD asfd asdfa
+ADD asfd 
+ADD
 PRINT
 MIN
 MAX
