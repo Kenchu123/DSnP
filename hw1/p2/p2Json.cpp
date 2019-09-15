@@ -60,8 +60,8 @@ bool Json::checkArgs(const string& ar, const size_t& num) const {
       cerr << "Error: Extra argument \"" << ar.substr(ind) << "\"!!" << endl; flag = 0;
    }
    else if (args.size() < num) {
-      if (args.empty()) { cerr << "Missing argument!!" << endl; flag = 0; }
-      else { cerr << "Missing argument after \"" << args.back() << "\"!!" << endl; flag = 0; }
+      if (args.empty()) { cerr << "Error: Missing argument!!" << endl; flag = 0; }
+      else { cerr << "Error: Missing argument after \"" << args.back() << "\"!!" << endl; flag = 0; }
    }
    return flag;
 }
@@ -77,13 +77,13 @@ void Json::printAll() const {
 void Json::printMin() const {
    JsonElem mi = _obj[0];
    for (auto ele : _obj) if (mi._value > ele._value) mi = ele;
-   cout << "{ " << mi << " }.\n";
+   cout << "The minimum element is: { " << mi << " }.\n";
 }
 
 void Json::printMax() const {
    JsonElem ma = _obj[0];
    for (auto ele : _obj) if (ma._value < ele._value) ma = ele;
-   cout << "{ " << ma << " }.\n";
+   cout << "The maximum element is: { " << ma << " }.\n";
 }
 
 void Json::add(const string& args) {
@@ -93,7 +93,7 @@ void Json::add(const string& args) {
    ss >> key >> valStr;
    for (auto ch : key) {
       if ((ch < '0' || ch > '9') && (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && ch != '_') {
-         cerr << "Illegal argument \"" << key << "\"!!" << endl;
+         cerr << "Error: Illegal argument \"" << key << "\"!!" << endl;
          return;
       }
    }
@@ -109,7 +109,7 @@ void Json::add(const string& args) {
       _sum += val;
    }
    catch (const invalid_argument& a) {
-      cerr << "Illegal argument \"" << valStr << "\"!!" << endl;
+      cerr << "Error: Illegal argument \"" << valStr << "\"!!" << endl;
    }
 }
 

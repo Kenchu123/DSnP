@@ -1,0 +1,25 @@
+test4.json
+PRINT asdf asdf
+MIN
+MAX
+SUM
+AVE
+ADD hello 7122
+ADD hello 7555
+ADD hello sdf sasfa
+ADD jizz -98765
+ADD asfd asdfa
+PRINT
+MIN
+MAX
+SUM
+AVE
+ADD 23454235 243431
+PRINT
+MAX
+MIN
+SUM
+AVE
+PRINT
+EXIT
+
