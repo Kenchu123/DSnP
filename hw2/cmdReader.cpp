@@ -47,6 +47,10 @@ CmdParser::readCmdInt(istream& istr)
          case LINE_END_KEY   :
          case END_KEY        : moveBufPtr(_readBufEnd); break;
          case BACK_SPACE_KEY : {
+            if (_readBufPtr == _readBuf) {
+                    mybeep();
+                    break;
+            }
             moveBufPtr(_readBufPtr - 1);
             deleteChar();
             break;
