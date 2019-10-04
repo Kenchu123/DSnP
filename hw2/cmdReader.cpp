@@ -256,7 +256,7 @@ CmdParser::moveToHistory(int index)
    }
    // moving down
    else {
-      if (_historyIdx == _history.size()) { mybeep(); return; }
+      if (_historyIdx == _history.size() || (_historyIdx == _history.size() - 1 && _tempCmdStored)) { mybeep(); return; }
       if (index >= _history.size()) index = _history.size() - 1;
    }
    _historyIdx = index;
