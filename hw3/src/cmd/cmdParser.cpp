@@ -98,6 +98,10 @@ void
 CmdParser::printHelps() const
 {
    // TODO...
+   for (map<const string, CmdExec*>::const_iterator it = _cmdMap.begin(); it != _cmdMap.end(); ++it) {
+      CmdExec* e = it->second;
+      e->help();
+   }
 }
 
 void
@@ -137,10 +141,14 @@ CmdParser::parseCmd(string& option)
    assert(_tempCmdStored == false);
    assert(!_history.empty());
    string str = _history.back();
-
-   // TODO...
    assert(str[0] != 0 && str[0] != ' ');
-   return NULL;
+
+   string fstWord; // cmd is the first word
+   size_t fstWord_end = myStrGetTok(str, fstWord);
+   CmdExec* e = getCmd(fstWord);
+   if (e == 0) cerr << "Illegal command!! (" << fstWord << ")" << endl;
+   if (fstWord_end != string::npos) option = str.substr(fstWord_end);
+   return e;
 }
 
 // Remove this function for TODO...
@@ -312,6 +320,17 @@ CmdParser::getCmd(string cmd)
 {
    CmdExec* e = 0;
    // TODO...
+   cout << "getCmd: " << cmd << endl;
+   string cmds[13] = {"DBAPpend", "DBAVerage", "DBCount", "DBMAx", "DBMIn", "DBPrint", "DBRead", 
+    "DBSOrt", "DBSUm", "DOfile", "HELp", "HIStory", "Quit" };
+   unsigned nCmps[13] = {4, 4, 3, 4, 4, 3, 3, 4, 4, 2, 3, 3, 1};
+   for (size_t i = 0;i < 13; ++i) {
+      if (myStrNCmp(cmds[i], cmd, nCmps[i]) == 0) {
+         if (_cmdMap.find(cmds[i].substr(0, nCmps[i])) != _cmdMap.end()) {
+            e = _cmdMap[cmds[i].substr(0, nCmps[i])];
+         }
+      }
+   }
    return e;
 }
 

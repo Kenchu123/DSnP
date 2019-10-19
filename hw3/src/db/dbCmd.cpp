@@ -20,6 +20,22 @@ bool
 initDbCmd()
 {
    // TODO...
+   vector<bool> check;
+   check.push_back(cmdMgr->regCmd("DBAPpend", 4, new DBAppendCmd));
+   check.push_back(cmdMgr->regCmd("DBAVerage", 4, new DBAveCmd));
+   check.push_back(cmdMgr->regCmd("DBCount", 3, new DBCountCmd));
+   check.push_back(cmdMgr->regCmd("DBMAx", 4, new DBMaxCmd));
+   check.push_back(cmdMgr->regCmd("DBMIn", 4, new DBMinCmd));
+   check.push_back(cmdMgr->regCmd("DBPrint", 3, new DBPrintCmd));
+   check.push_back(cmdMgr->regCmd("DBRead", 3, new DBReadCmd));
+   check.push_back(cmdMgr->regCmd("DBSOrt", 4, new DBSortCmd));
+   check.push_back(cmdMgr->regCmd("DBSUm", 4, new DBSumCmd));
+   for (auto i : check) {
+      if (!i) {
+         cerr << "Registering \"init\" commands fails... exiting" << endl;
+         return false;
+      }
+   }
    return true;
 }
 
@@ -31,6 +47,12 @@ DBAppendCmd::exec(const string& option)
 {
    // TODO...
    // check option
+   vector<string> options;
+   if (!CmdExec::lexOptions(option, options))
+      return CMD_EXEC_ERROR;
+   if (options.empty())
+      return CmdExec::errorOption(CMD_OPT_MISSING, "");
+
 
    return CMD_EXEC_DONE;
 }
