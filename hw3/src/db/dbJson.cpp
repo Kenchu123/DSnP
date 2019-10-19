@@ -36,7 +36,23 @@ istream& operator >> (istream& is, DBJson& j)
    // - You can assume the input file is with correct JSON file format
    // - NO NEED to handle error file format
    assert(j._obj.empty());
-
+   vector<string> lines;
+   string line;
+   while (getline(is,line)) lines.push_back(line);
+   for (size_t i = 1; i < lines.size() - 1; ++i) {
+      size_t l1 = lines[i].find('"');
+      size_t l2 = lines[i].find('"', l1 + 1);
+      string key = lines[i].substr(l1 + 1, l2 - l1 - 1);
+      size_t r = lines[i].find(':');
+      int val;
+      string toInt;
+      if (i == lines.size() - 2) toInt = lines[i].substr(r + 2);
+      else toInt = lines[i].substr(r + 2, lines[i].size() - r - 2);
+      myStr2Int(toInt, val);
+      cout << key << " " << val << endl;
+      j._obj.emplace_back(key, val);
+   }
+   j._isRead = true;
    return is;
 }
 
