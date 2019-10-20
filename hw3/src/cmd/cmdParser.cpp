@@ -375,14 +375,54 @@ CmdParser::listCmd(const string& str)
             reprintCmd();
          }
          if (_tabPressCount == 2) {
-            // 6.1 // list file
-
-            if (str[str.size() - 1] = ' ') {
-
+            string prefix, dir = ".";
+            vector<string> files;
+            size_t last_space = str.find_last_of(' ');
+            prefix = str.substr(last_space + 1);
+            listDir(files, prefix, dir);
+            if (files.size() == 1) {
+               for (auto ch : files[0].substr(prefix.size())) insertChar(ch);
+               insertChar(' ');
             }
-            else { // treat it as prefix
+            if (files.empty()) {
+               mybeep();
+               _tabPressCount = 1;
+            }
+            if (files.size() > 1) {
+               // check all files prefix the same
+               bool have_new_prefix = 1;
+               size_t npLen = prefix.size(); // new Prefix Len
+               while (have_new_prefix) {
+                  string newPrefix = files[0].substr(0, npLen);
+                  for (auto file : files) {
+                     if (newPrefix != file.substr(0, npLen)) {
+                        have_new_prefix = 0;
+                        break;
+                     }
+                  }
+                  if (have_new_prefix) npLen++;
+               }
+               npLen -= 1;
+               if (npLen == prefix.size()) {
+                  cout << endl;
+                  size_t cnt = 0;
+                  for (size_t i = 0;i < files.size(); ++i, ++cnt) {
+                     cout << setw(16) << left << files[i];
+                     if (cnt % 5 == 4 && cnt != files.size() - 1) cout << endl;
+                  }
+                  reprintCmd();
+               } else { // have new prefix
+                  for (size_t i = prefix.size(); i < npLen; ++i) {
+                     insertChar(files[0][i]);
+                  }
+               }
+               _tabPressCount = 1;
             }
 
+         }
+         if (_tabPressCount == 3) {
+            mybeep();
+            _tabPressCount = 2;
          }
       } 
       else {
