@@ -46,14 +46,29 @@ CmdExecStatus
 DBAppendCmd::exec(const string& option)
 {
    // TODO...
-   // check option
-   vector<string> options;
-   if (!CmdExec::lexOptions(option, options))
+   // check db is created
+   if (!dbjson) {
+      cerr << "Error: DB is not created yet!!" << endl;
       return CMD_EXEC_ERROR;
-   if (options.empty())
-      return CmdExec::errorOption(CMD_OPT_MISSING, "");
+   }
+   // check option
+   vector<string> tokens;
+   if (!CmdExec::lexOptions(option, tokens, 2))
+      return CMD_EXEC_ERROR;
+   // check valid
+   string key = tokens[0];
+   int value;
+   if (!isValidVarName(key)) 
+      return CmdExec::errorOption(CMD_OPT_ILLEGAL, key);
+   if (!myStr2Int(tokens[1], value)) 
+      return CmdExec::errorOption(CMD_OPT_ILLEGAL, tokens[1]);
 
-
+   DBJsonElem ele(key, value);   
+   if (!dbjson.add(ele)) {
+      cerr << "Element with key \"" << key << "\" already exists!!" << endl;
+      return CMD_EXEC_ERROR;
+   }
+   
    return CMD_EXEC_DONE;
 }
 
@@ -220,7 +235,33 @@ CmdExecStatus
 DBPrintCmd::exec(const string& option)
 {  
    // TODO...
+   // check single option
+   string token;
+   if (!CmdExec::lexSingleOption(option, token))
+      return CMD_EXEC_ERROR;
+   if (!dbjson) {
+      cerr << "Error: DB is not created yet!!" << endl;
+      return CMD_EXEC_ERROR;
+   }
+   // has option
+   if (token.size()) {
+      // check key(token) is in _obj
+      bool isFound = 0;
+      for (size_t i = 0;i < dbjson.size(); ++i) {
+         if (dbjson[i].key() == token) {
+            isFound = 1;
+            cout << "{ " <<  dbjson[i] << " } " << endl;
+            break;
+         }
+      }
+      if (!isFound) {
+         cerr << "Error: No JSON element with key \"" << token << "\" is found." << endl;
+         return CMD_EXEC_ERROR;
+      }
 
+   }
+   // no option
+   else cout << dbjson;
    return CMD_EXEC_DONE;
 }
 
