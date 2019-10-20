@@ -327,10 +327,11 @@ CmdParser::listCmd(const string& str)
          cout << setw(12) << left << it->first + it->second->getOptCmd();
          if (cnt % 5 == 4) cout << endl;
       }
+      _tabPressCount = 0;
       reprintCmd();
    }
    // check partially match command
-   if (str.size()) {
+   if (str.size() && str.find(' ', place_not_space) == string::npos) {
       vector<CmdMap::const_iterator> matches;
       for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it) {
          string cmd = it->first + it->second->getOptCmd();
@@ -360,6 +361,35 @@ CmdParser::listCmd(const string& str)
          }
          reprintCmd();
       }
+      _tabPressCount = 0;
+   }
+   // check if tok match to some cmd befor cursor's space
+   if (str.size() && str.find(' ', place_not_space) != string::npos) { // if space is front of cursor
+      string cmd;
+      myStrGetTok(str, cmd, place_not_space);
+      CmdExec* e = getCmd(cmd);
+      if (e) { // first word match cmd
+         if (_tabPressCount == 1) { // tabpress = 1
+            cout << endl;
+            e->usage(cout);
+            reprintCmd();
+         }
+         if (_tabPressCount == 2) {
+            // 6.1 // list file
+
+            if (str[str.size() - 1] = ' ') {
+
+            }
+            else { // treat it as prefix
+            }
+
+         }
+      } 
+      else {
+         mybeep();
+         _tabPressCount = 0;
+      }
+
    }
 
 }
