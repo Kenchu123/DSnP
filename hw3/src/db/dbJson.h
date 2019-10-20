@@ -60,7 +60,7 @@ public:
    // return true if JSON file hasn't been read in
    bool operator !() { return !_isRead; }
    // return this if JSON file has been read in; return NLL if not.
-   operator void* () const { 
+   operator void* () const {
       if (_isRead) return (void*)(this);
       else return NULL; 
    }

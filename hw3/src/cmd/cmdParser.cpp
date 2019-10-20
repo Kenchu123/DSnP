@@ -29,7 +29,18 @@ bool
 CmdParser::openDofile(const string& dof)
 {
    // TODO...
+   // check recursive depth
+   if (_dofileStack.size() >= 1024) {
+      cerr << "Error: Recursive over 1024 depth" << endl;
+      delete _dofile;
+      _dofile = 0;
+   }
    _dofile = new ifstream(dof.c_str());
+   if (!_dofile->is_open()) {
+      if (!_dofileStack.empty()) _dofile = _dofileStack.top();
+      return false;
+   }
+   _dofileStack.push(_dofile);
    return true;
 }
 
@@ -40,6 +51,9 @@ CmdParser::closeDofile()
    assert(_dofile != 0);
    // TODO...
    delete _dofile;
+   _dofileStack.pop();
+   if (!_dofileStack.empty()) _dofile = _dofileStack.top();
+   else _dofile = 0;
 }
 
 // Return false if registration fails
@@ -102,6 +116,7 @@ CmdParser::printHelps() const
       CmdExec* e = it->second;
       e->help();
    }
+   cout << endl;
 }
 
 void
@@ -302,6 +317,121 @@ void
 CmdParser::listCmd(const string& str)
 {
    // TODO...
+   // if only contain ' '
+   size_t place_not_space = str.find_first_not_of(' ');
+   CmdMap::const_iterator it;
+   if (place_not_space == string::npos) {
+      cout << endl;
+      int cnt = 0;
+      for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it, ++cnt) {
+         cout << setw(12) << left << it->first + it->second->getOptCmd();
+         if (cnt % 5 == 4) cout << endl;
+      }
+      _tabPressCount = 0;
+      reprintCmd();
+   }
+   // check partially match command
+   if (str.size() && str.find(' ', place_not_space) == string::npos) {
+      vector<CmdMap::const_iterator> matches;
+      for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it) {
+         string cmd = it->first + it->second->getOptCmd();
+         if (str.size() > cmd.size()) break;
+         assert(str.size() <= cmd.size());
+         bool isMatch = 1;
+         for (size_t i = 0;i < str.size(); ++i) {
+            if (tolower(str[i]) != tolower(cmd[i])) {
+               isMatch = 0;
+            }
+         }
+         if (isMatch) matches.push_back(it);
+      }
+      if (matches.size() == 0) mybeep();
+      else if(matches.size() == 1) {
+         string cmd = matches[0]->first + matches[0]->second->getOptCmd();
+         for (size_t i = str.size(); i < cmd.size(); ++i) insertChar(cmd[i]);
+         insertChar(' ');
+
+      }
+      else {
+         size_t cnt = 0;
+         cout << endl;
+         for (size_t i = 0; i < matches.size(); ++i, ++cnt) {
+            cout << setw(12) << left << matches[i]->first + matches[i]->second->getOptCmd();
+            if (cnt % 5 == 4 && cnt != matches.size() - 1) cout << endl;
+         }
+         reprintCmd();
+      }
+      _tabPressCount = 0;
+   }
+   // check if tok match to some cmd befor cursor's space
+   if (str.size() && str.find(' ', place_not_space) != string::npos) { // if space is front of cursor
+      string cmd;
+      myStrGetTok(str, cmd, place_not_space);
+      CmdExec* e = getCmd(cmd);
+      if (e) { // first word match cmd
+         if (_tabPressCount == 1) { // tabpress = 1
+            cout << endl;
+            e->usage(cout);
+            reprintCmd();
+         }
+         if (_tabPressCount == 2) {
+            string prefix, dir = ".";
+            vector<string> files;
+            size_t last_space = str.find_last_of(' ');
+            prefix = str.substr(last_space + 1);
+            listDir(files, prefix, dir);
+            if (files.size() == 1) {
+               for (auto ch : files[0].substr(prefix.size())) insertChar(ch);
+               insertChar(' ');
+            }
+            if (files.empty()) {
+               mybeep();
+               _tabPressCount = 1;
+            }
+            if (files.size() > 1) {
+               // check all files prefix the same
+               bool have_new_prefix = 1;
+               size_t npLen = prefix.size(); // new Prefix Len
+               while (have_new_prefix) {
+                  string newPrefix = files[0].substr(0, npLen);
+                  for (auto file : files) {
+                     if (newPrefix != file.substr(0, npLen)) {
+                        have_new_prefix = 0;
+                        break;
+                     }
+                  }
+                  if (have_new_prefix) npLen++;
+               }
+               npLen -= 1;
+               if (npLen == prefix.size()) {
+                  cout << endl;
+                  size_t cnt = 0;
+                  for (size_t i = 0;i < files.size(); ++i, ++cnt) {
+                     cout << setw(16) << left << files[i];
+                     if (cnt % 5 == 4 && cnt != files.size() - 1) cout << endl;
+                  }
+                  reprintCmd();
+               } else { // have new prefix
+                  for (size_t i = prefix.size(); i < npLen; ++i) {
+                     insertChar(files[0][i]);
+                  }
+               }
+               _tabPressCount = 1;
+            }
+
+         }
+         if (_tabPressCount == 3) {
+            mybeep();
+            _tabPressCount = 2;
+         }
+      } 
+      else {
+         mybeep();
+         _tabPressCount = 0;
+      }
+
+   }
+
 }
 
 // cmd is a copy of the original input
@@ -320,15 +450,10 @@ CmdParser::getCmd(string cmd)
 {
    CmdExec* e = 0;
    // TODO...
-   cout << "getCmd: " << cmd << endl;
-   string cmds[13] = {"DBAPpend", "DBAVerage", "DBCount", "DBMAx", "DBMIn", "DBPrint", "DBRead", 
-    "DBSOrt", "DBSUm", "DOfile", "HELp", "HIStory", "Quit" };
-   unsigned nCmps[13] = {4, 4, 3, 4, 4, 3, 3, 4, 4, 2, 3, 3, 1};
-   for (size_t i = 0;i < 13; ++i) {
-      if (myStrNCmp(cmds[i], cmd, nCmps[i]) == 0) {
-         if (_cmdMap.find(cmds[i].substr(0, nCmps[i])) != _cmdMap.end()) {
-            e = _cmdMap[cmds[i].substr(0, nCmps[i])];
-         }
+   CmdMap::const_iterator it = _cmdMap.begin();
+   for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it) {
+      if (myStrNCmp(it->first + it->second->getOptCmd(), cmd, (it->first).size()) == 0) {
+         e = it->second;
       }
    }
    return e;
