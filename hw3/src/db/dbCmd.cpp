@@ -250,7 +250,7 @@ DBPrintCmd::exec(const string& option)
       for (size_t i = 0;i < dbjson.size(); ++i) {
          if (dbjson[i].key() == token) {
             isFound = 1;
-            cout << "{ " <<  dbjson[i] << " } " << endl;
+            cout << "{ " <<  dbjson[i] << " }" << endl;
             break;
          }
       }

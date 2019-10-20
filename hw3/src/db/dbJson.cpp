@@ -57,7 +57,6 @@ istream& operator >> (istream& is, DBJson& j)
          if (lines[i][j] > '9' || lines[i][j] < '0') { v2--; break; }
       }
       myStr2Int(lines[i].substr(v1, v2 - v1 + 1), val);
-      cout << key << " " << val << endl;
       j._obj.emplace_back(key, val);
    }
    j._isRead = true;

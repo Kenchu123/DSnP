@@ -58,12 +58,9 @@ public:
 
    // TODO modify these two functions according to the comments
    // return true if JSON file hasn't been read in
-   bool operator !() { 
-      cout << "bool operator! is called!, _isRead: " << _isRead << endl;
-      return !_isRead; }
+   bool operator !() { return !_isRead; }
    // return this if JSON file has been read in; return NLL if not.
    operator void* () const {
-      cout << "void* () const is called!, _isRead: " << _isRead << endl; 
       if (_isRead) return (void*)(this);
       else return NULL; 
    }

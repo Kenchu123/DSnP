@@ -30,6 +30,11 @@ CmdParser::openDofile(const string& dof)
 {
    // TODO...
    _dofile = new ifstream(dof.c_str());
+   if (!_dofile->is_open()) {
+      if (!_dofileStack.empty()) _dofile = _dofileStack.top();
+      return false;
+   }
+   _dofileStack.push(_dofile);
    return true;
 }
 
@@ -40,6 +45,9 @@ CmdParser::closeDofile()
    assert(_dofile != 0);
    // TODO...
    delete _dofile;
+   _dofileStack.pop();
+   if (!_dofileStack.empty()) _dofile = _dofileStack.top();
+   else _dofile = 0;
 }
 
 // Return false if registration fails
@@ -102,6 +110,7 @@ CmdParser::printHelps() const
       CmdExec* e = it->second;
       e->help();
    }
+   cout << endl;
 }
 
 void
