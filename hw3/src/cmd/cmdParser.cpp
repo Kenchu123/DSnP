@@ -346,10 +346,13 @@ CmdParser::listCmd(const string& str)
       }
       if (matches.size() == 0) mybeep();
       else if(matches.size() == 1) {
+         string cmd = matches[0]->first + matches[0]->second->getOptCmd();
+         for (size_t i = str.size(); i < cmd.size(); ++i) insertChar(cmd[i]);
+         insertChar(' ');
 
       }
       else {
-         int cnt = 0;
+         size_t cnt = 0;
          cout << endl;
          for (size_t i = 0; i < matches.size(); ++i, ++cnt) {
             cout << setw(12) << left << matches[i]->first + matches[i]->second->getOptCmd();
