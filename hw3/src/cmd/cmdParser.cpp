@@ -317,6 +317,48 @@ void
 CmdParser::listCmd(const string& str)
 {
    // TODO...
+   // if only contain ' '
+   size_t place_not_space = str.find_first_not_of(' ');
+   CmdMap::const_iterator it;
+   if (place_not_space == string::npos) {
+      cout << endl;
+      int cnt = 0;
+      for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it, ++cnt) {
+         cout << setw(12) << left << it->first + it->second->getOptCmd();
+         if (cnt % 5 == 4) cout << endl;
+      }
+      reprintCmd();
+   }
+   // check partially match command
+   if (str.size()) {
+      vector<CmdMap::const_iterator> matches;
+      for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it) {
+         string cmd = it->first + it->second->getOptCmd();
+         if (str.size() > cmd.size()) break;
+         assert(str.size() <= cmd.size());
+         bool isMatch = 1;
+         for (size_t i = 0;i < str.size(); ++i) {
+            if (tolower(str[i]) != tolower(cmd[i])) {
+               isMatch = 0;
+            }
+         }
+         if (isMatch) matches.push_back(it);
+      }
+      if (matches.size() == 0) mybeep();
+      else if(matches.size() == 1) {
+
+      }
+      else {
+         int cnt = 0;
+         cout << endl;
+         for (size_t i = 0; i < matches.size(); ++i, ++cnt) {
+            cout << setw(12) << left << matches[i]->first + matches[i]->second->getOptCmd();
+            if (cnt % 5 == 4 && cnt != matches.size() - 1) cout << endl;
+         }
+         reprintCmd();
+      }
+   }
+
 }
 
 // cmd is a copy of the original input
