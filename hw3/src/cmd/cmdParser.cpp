@@ -29,6 +29,12 @@ bool
 CmdParser::openDofile(const string& dof)
 {
    // TODO...
+   // check recursive depth
+   if (_dofileStack.size() >= 1024) {
+      cerr << "Error: Recursive over 1024 depth" << endl;
+      delete _dofile;
+      _dofile = 0;
+   }
    _dofile = new ifstream(dof.c_str());
    if (!_dofile->is_open()) {
       if (!_dofileStack.empty()) _dofile = _dofileStack.top();
