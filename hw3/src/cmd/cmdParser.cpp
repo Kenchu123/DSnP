@@ -320,15 +320,10 @@ CmdParser::getCmd(string cmd)
 {
    CmdExec* e = 0;
    // TODO...
-   cout << "getCmd: " << cmd << endl;
-   string cmds[13] = {"DBAPpend", "DBAVerage", "DBCount", "DBMAx", "DBMIn", "DBPrint", "DBRead", 
-    "DBSOrt", "DBSUm", "DOfile", "HELp", "HIStory", "Quit" };
-   unsigned nCmps[13] = {4, 4, 3, 4, 4, 3, 3, 4, 4, 2, 3, 3, 1};
-   for (size_t i = 0;i < 13; ++i) {
-      if (myStrNCmp(cmds[i], cmd, nCmps[i]) == 0) {
-         if (_cmdMap.find(cmds[i].substr(0, nCmps[i])) != _cmdMap.end()) {
-            e = _cmdMap[cmds[i].substr(0, nCmps[i])];
-         }
+   CmdMap::const_iterator it = _cmdMap.begin();
+   for (it = _cmdMap.begin(); it != _cmdMap.end(); ++it) {
+      if (myStrNCmp(it->first + it->second->getOptCmd(), cmd, (it->first).size()) == 0) {
+         e = it->second;
       }
    }
    return e;

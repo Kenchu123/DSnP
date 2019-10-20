@@ -40,20 +40,28 @@ istream& operator >> (istream& is, DBJson& j)
    vector<string> lines;
    string line;
    while (getline(is,line)) lines.push_back(line);
-   for (size_t i = 1; i < lines.size() - 1; ++i) {
+   for (size_t i = 0; i < lines.size(); ++i) {
+      if (lines[i].find('{') != string::npos || lines[i].find('}') != string::npos) continue;
       size_t l1 = lines[i].find('"');
+      if (l1 == string::npos) continue;
       size_t l2 = lines[i].find('"', l1 + 1);
       string key = lines[i].substr(l1 + 1, l2 - l1 - 1);
-      size_t r = lines[i].find(':');
+
       int val;
-      string toInt;
-      if (i == lines.size() - 2) toInt = lines[i].substr(r + 2);
-      else toInt = lines[i].substr(r + 2, lines[i].size() - r - 2);
-      myStr2Int(toInt, val);
+      size_t v1, v2;
+      for (size_t j = l2 + 1; j < lines[i].size(); ++j) {
+         if (lines[i][j] == '-' || (lines[i][j] <= '9' && lines[i][j] >= '0')) { v1 = j; break; }
+      }
+      for (size_t j = v1 + 1; j < lines[i].size(); ++j) {
+         v2 = j;
+         if (lines[i][j] > '9' || lines[i][j] < '0') { v2--; break; }
+      }
+      myStr2Int(lines[i].substr(v1, v2 - v1 + 1), val);
       cout << key << " " << val << endl;
       j._obj.emplace_back(key, val);
    }
    j._isRead = true;
+   lines.clear();
    is.clear();
    return is;
 }
