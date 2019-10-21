@@ -383,11 +383,9 @@ CmdParser::listCmd(const string& str)
             if (files.size() == 1) {
                for (auto ch : files[0].substr(prefix.size())) insertChar(ch);
                insertChar(' ');
-            }
-            if (files.empty()) {
                mybeep();
-               _tabPressCount = 1;
             }
+            if (files.empty()) mybeep();
             if (files.size() > 1) {
                // check all files prefix the same
                bool have_new_prefix = 1;
@@ -416,13 +414,8 @@ CmdParser::listCmd(const string& str)
                      insertChar(files[0][i]);
                   }
                }
-               _tabPressCount = 1;
             }
-
-         }
-         if (_tabPressCount == 3) {
-            mybeep();
-            _tabPressCount = 2;
+            _tabPressCount = 1;
          }
       } 
       else {
