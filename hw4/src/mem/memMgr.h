@@ -47,11 +47,11 @@ private:                                                                    \
 //
 // To promote 't' to the nearest multiple of SIZE_T; 
 // e.g. Let SIZE_T = 8;  toSizeT(7) = 8, toSizeT(12) = 16
-#define toSizeT(t)      0  // TODO
+#define toSizeT(t)      t + SIZE_T - t % SIZE_T  // TODO
 //
 // To demote 't' to the nearest multiple of SIZE_T
 // e.g. Let SIZE_T = 8;  downtoSizeT(9) = 8, downtoSizeT(100) = 96
-#define downtoSizeT(t)  0  // TODO
+#define downtoSizeT(t)  t - t % SIZE_T  // TODO
 
 // R_SIZE is the size of the recycle list
 #define R_SIZE 256
@@ -89,6 +89,10 @@ class MemBlock
    // 4. Return false if not enough memory
    bool getMem(size_t t, T*& ret) {
       // TODO
+      t = toSizeT(t);
+      if (getRemainSize() < t) return false; // if not enough memory
+      ret = (T*)(void*)_ptr; // return memory address
+      _ptr += t; // new _ptr
       return true;
    }
    size_t getRemainSize() const { return size_t(_end - _ptr); }
@@ -122,16 +126,24 @@ class MemRecycleList
    // pop out the first element in the recycle list
    T* popFront() {
       // TODO
-      return 0;
+      T* ret = _first;
+      _first = *(T**)_first; // cast _first to T** and get it's value, which is a T* to the next
+      return ret;
    }
    // push the element 'p' to the beginning of the recycle list
    void  pushFront(T* p) {
       // TODO
+      // make p's first 4 byte to faddr
+      // make p a T**, since it's content is a T pointer
+      *(T**)p = _first;
+      // _first is new p
+      _first = p;
    }
    // Release the memory occupied by the recycle list(s)
    // DO NOT release the memory occupied by MemMgr/MemBlock
    void reset() {
       // TODO
+      while (popFront() != 0) {};
    }
 
    // Helper functions
@@ -139,7 +151,13 @@ class MemRecycleList
    // count the number of elements in the recycle list
    size_t numElm() const {
       // TODO
-      return 0;
+      size_t cnt = 0;
+      T* tmp = _first;
+      while (tmp != 0) { 
+         ++cnt;
+         tmp = *(T**) tmp;
+      }
+      return cnt;
    }
 
    // Data members
