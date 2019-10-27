@@ -81,6 +81,8 @@ MTNewCmd::exec(const string& option)
    // TODO
 
    // Use try-catch to catch the bad_alloc exception
+   //    cerr << "Requested memory (" << t << ") is greater than block size"
+   //         << "(" << _blockSize << "). " << "Exception raised...\n";
    return CMD_EXEC_DONE;
 }
 

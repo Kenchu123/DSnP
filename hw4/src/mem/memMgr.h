@@ -194,6 +194,30 @@ public:
       cout << "Resetting memMgr...(" << b << ")" << endl;
       #endif // MEM_DEBUG
       // TODO
+      // remove memory of all but firstly allocated MemBlocks
+      while (_activeBlock->_nextBlock != NULL) {
+         MemBlock<T>* tmp = _activeBlock->_nextBlock;
+         delete _activeBlock;
+         _activeBlock = tmp;
+      }
+      _activeBlock->reset();
+
+      // reset _recycleList
+      for (size_t i = 0;i < R_SIZE; ++i) {
+         MemRecycleList<T>* tmp = _recycleList[i]._nextList;
+         _recycleList[i].reset();
+         while (tmp != NULL) {
+            tmp->reset();
+            tmp = tmp->_nextList;
+         }
+      }
+
+      // reallocate memory for first MemBlock
+      if (b != _blockSize && b != 0) {
+         delete _activeBlock;
+         _activeBlock = new MemBlock<T>(0, b);
+      }
+
    }
    // Called by new
    T* alloc(size_t t) {
@@ -226,7 +250,7 @@ public:
       // TODO
       // Get the array size 'n' stored by system,
       // which is also the _recycleList index
-      size_t n = 0;
+      size_t n = *((size_t*)(void*)p - 1);
       #ifdef MEM_DEBUG
       cout << ">> Array size = " << n << endl;
       cout << "Recycling " << p << " to _recycleList[" << n << "]" << endl;
@@ -277,7 +301,9 @@ private:
       assert(t % SIZE_T == 0);
       assert(t >= S);
       // TODO
-      return 0;
+      // sizeof element T
+      size_t size = toSizeT(sizeof(T));
+      return t / size;
    }
    // Go through _recycleList[m], its _nextList, and _nexList->_nextList, etc,
    //    to find a recycle list whose "_arrSize" == "n"
@@ -290,7 +316,16 @@ private:
    MemRecycleList<T>* getMemRecycleList(size_t n) {
       size_t m = n % R_SIZE;
       // TODO
-      return 0;
+      MemRecycleList<T>* tmp = &_recycleList[m];
+      while (tmp->getArrSize() != n) {
+         if (tmp->getNextList() != NULL) tmp = tmp->getNextList();
+         else { // not found
+            MemRecycleList<T>* newRecycleList = new MemRecycleList<T>(n);
+            tmp->_nextList = newRecycleList;
+            return newRecycleList;
+         }
+      }
+      return tmp;
    }
    // t is the #Bytes requested from new or new[]
    // Note: Make sure the returned memory is a multiple of SIZE_T
@@ -307,17 +342,33 @@ private:
       //    cerr << "Requested memory (" << t << ") is greater than block size"
       //         << "(" << _blockSize << "). " << "Exception raised...\n";
       // TODO
-
+      if (t > _blockSize) {
+         throw bad_alloc();
+      }
       // 3. Check the _recycleList first...
       //    Print this message for memTest.debug
-      //    #ifdef MEM_DEBUG
-      //    cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
-      //    #endif // MEM_DEBUG
+         // #ifdef MEM_DEBUG
+         // cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
+         // #endif // MEM_DEBUG
       //    => 'n' is the size of array
       //    => "ret" is the return address
       size_t n = getArraySize(t);
       // TODO
-
+      MemRecycleList<T>* tmpRecycleList = getMemRecycleList(n);
+      if (tmpRecycleList->numElm() > 0) { // found
+         ret = tmpRecycleList->popFront();
+      }
+      else { // not found
+         // _activeBlock->getMem, store in ret
+         if (!_activeBlock->getMem(t, ret)) {
+            // not enough
+            size_t rn = _activeBlock->getRemainSize();
+            getMemRecycleList(rn)->pushFront((T*)(void*)_activeBlock->_ptr);
+            MemBlock<T>* newBlock = new MemBlock<T>(0, _blockSize);
+            _activeBlock->_nextBlock = newBlock;
+            newBlock->getMem(t, ret);
+         }
+      }
       // If no match from recycle list...
       // 4. Get the memory from _activeBlock
       // 5. If not enough, recycle the remained memory and print out ---
@@ -342,7 +393,9 @@ private:
    // Get the currently allocated number of MemBlock's
    size_t getNumBlocks() const {
       // TODO
-      return 0;
+      size_t cnt = 0;
+      while (_activeBlock->_nextBlock != NULL) ++cnt;
+      return cnt;
    }
 
 };
