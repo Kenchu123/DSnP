@@ -89,7 +89,7 @@ class MemBlock
    // 4. Return false if not enough memory
    bool getMem(size_t t, T*& ret) {
       // TODO
-      t = toSizeT(t);
+      if (t % SIZE_T) t = toSizeT(t);
       if (getRemainSize() < t) return false; // if not enough memory
       ret = (T*)(void*)_ptr; // return memory address
       _ptr += t; // new _ptr
@@ -218,6 +218,7 @@ public:
       if (b != _blockSize && b != 0) {
          delete _activeBlock;
          _activeBlock = new MemBlock<T>(0, b);
+         _blockSize = b;
       }
 
    }
@@ -395,8 +396,12 @@ private:
    // Get the currently allocated number of MemBlock's
    size_t getNumBlocks() const {
       // TODO
-      size_t cnt = 0;
-      while (_activeBlock->_nextBlock != NULL) ++cnt;
+      size_t cnt = 1;
+      MemBlock<T>* tmp = _activeBlock;
+      while (tmp->_nextBlock != 0) {
+         ++cnt;
+         tmp = tmp->_nextBlock;
+      }
       return cnt;
    }
 

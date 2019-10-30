@@ -79,10 +79,41 @@ CmdExecStatus
 MTNewCmd::exec(const string& option)
 {
    // TODO
-
    // Use try-catch to catch the bad_alloc exception
    //    cerr << "Requested memory (" << t << ") is greater than block size"
    //         << "(" << _blockSize << "). " << "Exception raised...\n";
+   
+   vector<string> options;
+   if (!CmdExec::lexOptions(option, options)) return CMD_EXEC_ERROR;
+   if (options.empty()) return CmdExec::errorOption(CMD_OPT_MISSING, "");
+
+   string numObjectsStr = "", arraySizeStr = "";
+   int numObjects, arraySize;
+   bool doArray = 0, hasNum = 0;
+   // check cmd
+   for (size_t i = 0;i < options.size(); ++i) {
+      if (myStrNCmp("-Array", options[i], 2) == 0) {
+         if (doArray) return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
+         doArray = 1;
+         if (i + 1 < options.size()) {
+            arraySizeStr = options[i + 1];
+            if (!myStr2Int(arraySizeStr, arraySize)) return CmdExec::errorOption(CMD_OPT_ILLEGAL, arraySizeStr);
+            ++i;
+         }
+         else return CmdExec::errorOption(CMD_OPT_MISSING, "");
+      }
+      else { // numObjects
+         if (hasNum) return CmdExec::errorOption(CMD_OPT_EXTRA, options[i]);
+         numObjectsStr = options[i];
+         if (!myStr2Int(numObjectsStr, numObjects)) return CmdExec::errorOption(CMD_OPT_ILLEGAL, numObjectsStr);
+         hasNum = 1;
+      }
+   }
+   // if no tell numObjects
+   if (numObjectsStr == "") return CmdExec::errorOption(CMD_OPT_MISSING, "");
+   if (doArray) mtest.newArrs(numObjects, arraySize);
+   else mtest.newObjs(numObjects);
+
    return CMD_EXEC_DONE;
 }
 
@@ -145,6 +176,7 @@ MTDeleteCmd::exec(const string& option)
       }
    }
    
+   
    // check num illegal
    if (doIndex) {
       if (num < 0) {
@@ -175,11 +207,15 @@ MTDeleteCmd::exec(const string& option)
    }
 
    // generate random
-   if (doRandom) num = rnGen(num);
+   vector<int> nums;
+   if (doRandom) for (size_t i = 0; i < num; ++i) nums.push_back(rnGen(num));
+
 
    // call function
-   if (doArray) mtest.deleteArr(num);
-   else mtest.deleteObj(num);
+   for (auto num : nums) {
+      if (doArray) mtest.deleteArr(num);
+      else mtest.deleteObj(num);
+   }
 
    return CMD_EXEC_DONE;
 }

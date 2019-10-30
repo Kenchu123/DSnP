@@ -1,0 +1,84 @@
+###########
+#   do1   #
+###########
+mtest> mtreset 590
+Resetting memMgr...(592)
+
+mtest> mtnew 3
+Calling alloc...(84)
+Calling MemMgr::getMem...(84)
+Recycled from _recycleList[0]...0
+Memory acquired... 0x55b5a8d37a20
+Calling alloc...(84)
+Calling MemMgr::getMem...(84)
+Recycled from _recycleList[0]...0
+Memory acquired... 0x55b5a8d37a80
+Calling alloc...(84)
+Calling MemMgr::getMem...(84)
+Recycled from _recycleList[0]...0
+Memory acquired... 0x55b5a8d37ae0
+
+mtest> mtp
+=========================================
+=              Memory Manager           =
+=========================================
+* Block size            : 65536 Bytes
+* Number of blocks      : 0
+* Free mem in last block: 304
+* Recycle list          : 
+
+=========================================
+=             class MemTest             =
+=========================================
+Object list ---
+ooo
+Array list ---
+
+
+mtest> mtdel -r 3
+Calling free...(0x55b5a8d37ae0)
+
+mtest> mtp
+=========================================
+=              Memory Manager           =
+=========================================
+* Block size            : 65536 Bytes
+* Number of blocks      : 0
+* Free mem in last block: 304
+* Recycle list          : 
+[  0] = 1         
+=========================================
+=             class MemTest             =
+=========================================
+Object list ---
+oox
+Array list ---
+
+
+mtest> mtnew 5 -a 3
+Calling allocArr...(260)
+Calling MemMgr::getMem...(260)
+Recycled from _recycleList[3]...0
+Memory acquired... 0x55b5a8d37b40
+Calling allocArr...(260)
+Calling MemMgr::getMem...(260)
+Recycled from _recycleList[3]...0
+Memory acquired... 0x55b5a8d50360
+Calling allocArr...(260)
+Calling MemMgr::getMem...(260)
+Recycled from _recycleList[3]...0
+Memory acquired... 0x55b5a8d60370
+Calling allocArr...(260)
+Calling MemMgr::getMem...(260)
+Recycled from _recycleList[3]...0
+Memory acquired... 0x55b5a8d70380
+Calling allocArr...(260)
+Calling MemMgr::getMem...(260)
+Recycled from _recycleList[3]...0
+Memory acquired... 0x55b5a8d80390
+
+mtest> mtp
+=========================================
+=              Memory Manager           =
+=========================================
+* Block size            : 65536 Bytes
