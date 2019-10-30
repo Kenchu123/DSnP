@@ -127,7 +127,9 @@ class MemRecycleList
    T* popFront() {
       // TODO
       T* ret = _first;
-      _first = *(T**)_first; // cast _first to T** and get it's value, which is a T* to the next
+      if (_first != 0) {
+         _first = *(T**)_first; // cast _first to T** and get it's value, which is a T* to the next
+      }
       return ret;
    }
    // push the element 'p' to the beginning of the recycle list
@@ -195,7 +197,7 @@ public:
       #endif // MEM_DEBUG
       // TODO
       // remove memory of all but firstly allocated MemBlocks
-      while (_activeBlock->_nextBlock != NULL) {
+      while (_activeBlock->_nextBlock != 0) {
          MemBlock<T>* tmp = _activeBlock->_nextBlock;
          delete _activeBlock;
          _activeBlock = tmp;
@@ -206,7 +208,7 @@ public:
       for (size_t i = 0;i < R_SIZE; ++i) {
          MemRecycleList<T>* tmp = _recycleList[i]._nextList;
          _recycleList[i].reset();
-         while (tmp != NULL) {
+         while (tmp != 0) {
             tmp->reset();
             tmp = tmp->_nextList;
          }
@@ -250,7 +252,7 @@ public:
       // TODO
       // Get the array size 'n' stored by system,
       // which is also the _recycleList index
-      size_t n = *((size_t*)(void*)p - 1);
+      size_t n = *((size_t*)(void*)p);
       #ifdef MEM_DEBUG
       cout << ">> Array size = " << n << endl;
       cout << "Recycling " << p << " to _recycleList[" << n << "]" << endl;
@@ -302,8 +304,8 @@ private:
       assert(t >= S);
       // TODO
       // sizeof element T
-      size_t size = toSizeT(sizeof(T));
-      return t / size;
+      // size_t size = S; // S = sizeof(T)
+      return (t - 8) / S;
    }
    // Go through _recycleList[m], its _nextList, and _nexList->_nextList, etc,
    //    to find a recycle list whose "_arrSize" == "n"
@@ -346,13 +348,13 @@ private:
          throw bad_alloc();
       }
       // 3. Check the _recycleList first...
+      size_t n = getArraySize(t);
       //    Print this message for memTest.debug
-         // #ifdef MEM_DEBUG
-         // cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
-         // #endif // MEM_DEBUG
+         #ifdef MEM_DEBUG
+         cout << "Recycled from _recycleList[" << n << "]..." << ret << endl;
+         #endif // MEM_DEBUG
       //    => 'n' is the size of array
       //    => "ret" is the return address
-      size_t n = getArraySize(t);
       // TODO
       MemRecycleList<T>* tmpRecycleList = getMemRecycleList(n);
       if (tmpRecycleList->numElm() > 0) { // found

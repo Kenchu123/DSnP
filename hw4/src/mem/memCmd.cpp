@@ -107,6 +107,79 @@ CmdExecStatus
 MTDeleteCmd::exec(const string& option)
 {
    // TODO
+   vector<string> options;
+   if (!CmdExec::lexOptions(option, options)) return CMD_EXEC_ERROR;
+   if (options.empty()) return CmdExec::errorOption(CMD_OPT_MISSING, "");
+
+   bool doArray = false, doIndex = false, doRandom = false;
+   string numStr;
+   int num;
+   // check cmd illegal
+   for (size_t i = 0;i < options.size(); ++i) {
+      if (myStrNCmp("-Index", options[i], 2) == 0) {
+         if (doIndex || doRandom) return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
+         doIndex = 1;
+         if (i + 1 < options.size()) {
+            numStr = options[i + 1];
+            if (!myStr2Int(numStr, num)) return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
+            ++i;
+         }
+         else return CmdExec::errorOption(CMD_OPT_MISSING, "");
+      }
+      else if (myStrNCmp("-Random", options[i], 2) == 0) {
+         if (doIndex || doRandom) return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
+         doRandom = 1;
+         if (i + 1 < options.size()) {
+            numStr = options[i + 1];
+            if (!myStr2Int(numStr, num)) return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
+            ++i;
+         }
+         else return CmdExec::errorOption(CMD_OPT_MISSING, "");
+      }
+      else if (myStrNCmp("-Array", options[i], 2) == 0) {
+         if (doArray) return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
+         doArray = 1;
+      }
+      else {
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
+      }
+   }
+   
+   // check num illegal
+   if (doIndex) {
+      if (num < 0) {
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
+      }
+      if (doArray && num >= mtest.getArrListSize()) {
+         cerr << "Size of array list (" << mtest.getArrListSize() << ") is <= " << num << "!!" << endl;
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
+      }
+      else if (!doArray && num >= mtest.getObjListSize()) {
+         cerr << "Size of array list (" << mtest.getObjListSize() << ") is <= " << num << "!!" << endl;
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
+      }
+   }
+
+   if (doRandom) {
+      if (num < 0) {
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
+      }
+      if (doArray && mtest.getArrListSize() == 0) {
+         cerr << "Size of array list is 0!!" << endl;
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, "-r");
+      }
+      if (!doArray && mtest.getObjListSize() == 0) {
+         cerr << "Size of object list is 0!!" << endl;
+         return CmdExec::errorOption(CMD_OPT_ILLEGAL, "-r");
+      }
+   }
+
+   // generate random
+   if (doRandom) num = rnGen(num);
+
+   // call function
+   if (doArray) mtest.deleteArr(num);
+   else mtest.deleteObj(num);
 
    return CMD_EXEC_DONE;
 }
