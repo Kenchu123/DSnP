@@ -197,7 +197,7 @@ MTDeleteCmd::exec(const string& option)
          return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
       }
       else if (!doArray && num >= mtest.getObjListSize()) {
-         cerr << "Size of array list (" << mtest.getObjListSize() << ") is <= " << num << "!!" << endl;
+         cerr << "Size of object list (" << mtest.getObjListSize() << ") is <= " << num << "!!" << endl;
          return CmdExec::errorOption(CMD_OPT_ILLEGAL, numStr);
       }
    }

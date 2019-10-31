@@ -145,13 +145,10 @@ class MemRecycleList
    // DO NOT release the memory occupied by MemMgr/MemBlock
    void reset() {
       // TODO
-      MemRecycleList<T>* tmp = _nextList;
-      if (_nextList != 0) {
-         tmp->reset();
-      }
-      _first = 0;
+      if (_nextList != 0) _nextList->reset();
       delete _nextList;
       _nextList = 0;
+      _first = 0;
    }
 
    // Helper functions
