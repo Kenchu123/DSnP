@@ -98,6 +98,7 @@ MTNewCmd::exec(const string& option)
          if (i + 1 < options.size()) {
             arraySizeStr = options[i + 1];
             if (!myStr2Int(arraySizeStr, arraySize)) return CmdExec::errorOption(CMD_OPT_ILLEGAL, arraySizeStr);
+            if (arraySize <= 0) return CmdExec::errorOption(CMD_OPT_ILLEGAL, arraySizeStr);
             ++i;
          }
          else return CmdExec::errorOption(CMD_OPT_MISSING, "");
@@ -106,13 +107,20 @@ MTNewCmd::exec(const string& option)
          if (hasNum) return CmdExec::errorOption(CMD_OPT_EXTRA, options[i]);
          numObjectsStr = options[i];
          if (!myStr2Int(numObjectsStr, numObjects)) return CmdExec::errorOption(CMD_OPT_ILLEGAL, numObjectsStr);
+         if (numObjects <= 0) return CmdExec::errorOption(CMD_OPT_ILLEGAL, numObjectsStr);
          hasNum = 1;
       }
    }
    // if no tell numObjects
    if (numObjectsStr == "") return CmdExec::errorOption(CMD_OPT_MISSING, "");
-   if (doArray) mtest.newArrs(numObjects, arraySize);
-   else mtest.newObjs(numObjects);
+
+   try {
+      if (doArray) mtest.newArrs(numObjects, arraySize);
+      else mtest.newObjs(numObjects);
+   }
+   catch (bad_alloc e) {
+      return CMD_EXEC_ERROR;
+   }
 
    return CMD_EXEC_DONE;
 }
@@ -175,6 +183,8 @@ MTDeleteCmd::exec(const string& option)
          return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[i]);
       }
    }
+
+   if (!doIndex && !doRandom) return CmdExec::errorOption(CMD_OPT_MISSING, ""); 
    
    
    // check num illegal
@@ -207,12 +217,21 @@ MTDeleteCmd::exec(const string& option)
    }
 
    // generate random
-   vector<int> nums;
-   if (doRandom) for (size_t i = 0; i < num; ++i) nums.push_back(rnGen(num));
-
+   // vector<int> nums;
+   // if (doRandom) for (size_t i = 0; i < num; ++i) {
+   //    nums.push_back(rnGen(num));
+   // }
+   size_t arrSize = mtest.getArrListSize();
+   size_t objSize = mtest.getObjListSize();
 
    // call function
-   for (auto num : nums) {
+   if (doRandom) {
+      for (size_t i = 0;i < num; ++i) {
+         if (doArray) mtest.deleteArr(rnGen(arrSize));
+         else mtest.deleteObj(rnGen(objSize));
+      }
+   }
+   else {
       if (doArray) mtest.deleteArr(num);
       else mtest.deleteObj(num);
    }
