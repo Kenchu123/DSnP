@@ -118,6 +118,7 @@ Array list ---
 oooxxoooooo
 
 mtest> mtnew -a 7 2
+Requested memory (600) is greater than block size(592). Exception raised...
 
 mtest> mtp
 =========================================
@@ -197,6 +198,8 @@ Array list ---
 xxxxxxxxxox
 
 mtest> mtdel -i 12 -a
+Size of array list (11) is <= 12!!
+Error: Illegal option!! (12)
 
 mtest> mtp
 =========================================
@@ -478,16 +481,22 @@ mtest> q -f
 #   do4   #
 ###########
 mtest> mtr 0
+Illegal block size (0)!!
+Error: Illegal option!! (0)
 
 mtest> mtr 79
+Illegal block size (79)!!
+Error: Illegal option!! (79)
 
 mtest> mtr 88
 
 mtest> mtn 1
 
 mtest> mtn 1 -a 1
+Requested memory (96) is greater than block size(88). Exception raised...
 
 mtest> mtn 1 -a 0
+Error: Illegal option!! (0)
 
 mtest> mtp
 =========================================
@@ -507,8 +516,10 @@ Array list ---
 
 
 mtest> MTD
+Error: Missing option!!
 
 mtest> mtd -a
+Error: Missing option!!
 
 mtest> mtd -r 4
 
@@ -522,8 +533,11 @@ mtest> mtr 500
 mtest> mtn 5
 
 mtest> mtd -a -Ran 3
+Size of array list is 0!!
+Error: Illegal option!! (-r)
 
 mtest> mtd -r -3
+Error: Illegal option!! (-3)
 
 mtest> mtd -r 3
 
@@ -566,8 +580,10 @@ Array list ---
 
 
 mtest> mtd -r -r 23
+Error: Illegal option!! (-r)
 
 mtest> mtd -r 23 -r
+Error: Illegal option!! (-r)
 
 mtest> mtd -r 23
 
@@ -591,14 +607,20 @@ Array list ---
 
 
 mtest> mtd -r 23 -i 5 -a
+Error: Illegal option!! (-i)
 
 mtest> mtn 123 -a 999
+Requested memory (83928) is greater than block size(504). Exception raised...
 
 mtest> mtn 123 -a 0
+Error: Illegal option!! (0)
 
 mtest> mtn 123 -a 10
+Requested memory (848) is greater than block size(504). Exception raised...
 
 mtest> mtd -ARR -i 54
+Size of array list (0) is <= 54!!
+Error: Illegal option!! (54)
 
 mtest> mtp
 =========================================
@@ -620,6 +642,8 @@ Array list ---
 
 
 mtest> mtd -a -r 100
+Size of array list is 0!!
+Error: Illegal option!! (-r)
 
 mtest> mtp
 =========================================
@@ -641,16 +665,23 @@ Array list ---
 
 
 mtest> mtn 60 -a 11
+Requested memory (936) is greater than block size(504). Exception raised...
 
 mtest> mtn 60 -a 10
+Requested memory (848) is greater than block size(504). Exception raised...
 
 mtest> mtr
 
 mtest> mtn 123 -a 10
+Requested memory (848) is greater than block size(504). Exception raised...
 
 mtest> mtd -ARR -i 54
+Size of array list (0) is <= 54!!
+Error: Illegal option!! (54)
 
 mtest> mtd -a -r 100
+Size of array list is 0!!
+Error: Illegal option!! (-r)
 
 mtest> mtp
 =========================================
@@ -670,10 +701,13 @@ Array list ---
 
 
 mtest> mtn 60 -a 10
+Requested memory (848) is greater than block size(504). Exception raised...
 
 mtest> mtn 60 -a 10 -i 3
+Error: Extra option!! (-i)
 
 mtest> mtn -a 10 60
+Requested memory (848) is greater than block size(504). Exception raised...
 
 mtest> mtp
 =========================================
@@ -695,14 +729,18 @@ Array list ---
 mtest> mtr 1234
 
 mtest> mtr -123
+Illegal block size (-123)!!
+Error: Illegal option!! (-123)
 
 mtest> mtr 100000
 
 mtest> mtn 60 -a 10
 
 mtest> mtn 30 -a 5130
+Requested memory (430928) is greater than block size(100000). Exception raised...
 
 mtest> mtn 80 -a 2058
+Requested memory (172880) is greater than block size(100000). Exception raised...
 
 mtest> mtp
 =========================================
@@ -723,8 +761,10 @@ oooooooooooooooooooooooooooooooooooooooooooooooooo
 oooooooooo
 
 mtest> mtn -r 20 -a
+Error: Illegal option!! (-r)
 
 mtest> mtn -r 50 -a
+Error: Illegal option!! (-r)
 
 mtest> mtn 60 -a 10
 
@@ -748,8 +788,10 @@ oooooooooooooooooooooooooooooooooooooooooooooooooo
 oooooooooooooooooooo
 
 mtest> mtn 30 -a 4878
+Requested memory (409760) is greater than block size(100000). Exception raised...
 
 mtest> mtn 80 -a 2058
+Requested memory (172880) is greater than block size(100000). Exception raised...
 
 mtest> mtn 1 -a 266
 
@@ -776,8 +818,10 @@ oooooooooooooooooooooooooooooooooooooooooooooooooo
 ooooooooooooooooooooooooooooooo
 
 mtest> mtn 30 -a 4879
+Requested memory (409848) is greater than block size(100000). Exception raised...
 
 mtest> mtn 80 -a 2059
+Requested memory (172968) is greater than block size(100000). Exception raised...
 
 mtest> mtn 10 -a 10
 
@@ -790,10 +834,12 @@ mtest> mtn 76 -a 778
 mtest> mtn 98 -a 1034
 
 mtest> mtn 200 -a 3476
+Requested memory (291992) is greater than block size(100000). Exception raised...
 
 mtest> mtd -r 3000 -a
 
 mtest> mtn 218 -a 2324
+Requested memory (195224) is greater than block size(100000). Exception raised...
 
 mtest> mtn 170 -a 404
 
@@ -804,8 +850,10 @@ mtest> mtn 192 -a 660
 mtest> mtn 2 -a 1172
 
 mtest> mtn 130 -a 1300
+Requested memory (109208) is greater than block size(100000). Exception raised...
 
 mtest> mtn 24 -a 1428
+Requested memory (119960) is greater than block size(100000). Exception raised...
 
 mtest> mtd -r 300 -a
 
@@ -816,14 +864,17 @@ mtest> mtn 214 -a 916
 mtest> mtn 108 -a 1044
 
 mtest> mtn -r 1000
+Error: Illegal option!! (-r)
 
 mtest> mtn -r 1000 -a
+Error: Illegal option!! (-r)
 
 mtest> mtn 623 -a 256
 
 mtest> mtn 623 -a 1024
 
 mtest> mtn 24 -a 1428
+Requested memory (119960) is greater than block size(100000). Exception raised...
 
 mtest> mtn 30 -a 3 
 
@@ -832,6 +883,7 @@ mtest> mtn 30 -a 3
 mtest> mtn 123
 
 mtest> mtd 55 -r
+Error: Illegal option!! (55)
 
 mtest> mtn 20000
 
