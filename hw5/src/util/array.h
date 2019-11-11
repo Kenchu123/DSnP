@@ -21,7 +21,7 @@ class Array
 {
 public:
    // TODO: decide the initial value for _isSorted
-   Array() : _data(0), _size(0), _capacity(0) {}
+   Array() : _data(0), _size(0), _capacity(0), _isSorted(0) {}
    ~Array() { delete []_data; }
 
    // DO NOT add any more data member or function for class iterator
@@ -37,42 +37,81 @@ public:
       // TODO: implement these overloaded operators
       const T& operator * () const { return (*this); }
       T& operator * () { return (*_node); }
-      iterator& operator ++ () { return (*this); }
-      iterator operator ++ (int) { return (*this); }
-      iterator& operator -- () { return (*this); }
-      iterator operator -- (int) { return (*this); }
+      iterator& operator ++ () { ++_node; return (*this); }
+      iterator operator ++ (int) { iterator ret = *this; ++(*this); return ret; }
+      iterator& operator -- () { --_node; return (*this); }
+      iterator operator -- (int) { iterator ret = *this; --(*this); return ret; }
 
-      iterator operator + (int i) const { return (*this); }
-      iterator& operator += (int i) { return (*this); }
+      iterator operator + (int i) const { iterator ret = *this; ret._node += i; return ret; }
+      iterator& operator += (int i) { *this = (*this) + i; return (*this); }
 
-      iterator& operator = (const iterator& i) { return (*this); }
+      iterator& operator = (const iterator& i) {
+         this->_node = i._node;
+         return (*this);
+      }
 
-      bool operator != (const iterator& i) const { return false; }
-      bool operator == (const iterator& i) const { return false; }
+      bool operator != (const iterator& i) const { return this->_node != i._node; }
+      bool operator == (const iterator& i) const { return this->_node == i._node; }
 
    private:
       T*    _node;
    };
 
    // TODO: implement these functions
-   iterator begin() const { return 0; }
-   iterator end() const { return 0; }
-   bool empty() const { return false; }
-   size_t size() const { return 0; }
+   iterator begin() const { iterator ret(_data); return ret; }
+   iterator end() const { return begin() + _size; }
+   bool empty() const { return _size == 0; }
+   size_t size() const { return _size; }
 
-   T& operator [] (size_t i) { return _data[0]; }
-   const T& operator [] (size_t i) const { return _data[0]; }
+   T& operator [] (size_t i) { return _data[i]; }
+   const T& operator [] (size_t i) const { return _data[i]; }
 
-   void push_back(const T& x) { }
-   void pop_front() { }
-   void pop_back() { }
+   void push_back(const T& x) {
+      if (_capacity == _size) { // increase the capacity
+         _capacity = (_capacity == 0) ? 1 : _capacity * 2;
+         T* tmp = new T[_capacity];
+         for (size_t i = 0;i < _size; ++i) tmp[i] = _data[i];
+         delete []_data;
+         _data = tmp;
+      }
+      _data[_size++] = x;
+   }
 
-   bool erase(iterator pos) { return false; }
-   bool erase(const T& x) { return false; }
+   void pop_front() {
+      if (_size == 0) return;
+      _data[0] = _data[--_size];
+   }
 
-   iterator find(const T& x) { return end(); }
+   void pop_back() {
+      if (_size == 0) return;
+      --_size;
+   }
 
-   void clear() { }
+   bool erase(iterator pos) {
+      iterator e = end();
+      if (pos == e) return false;
+      *pos = *(--e);
+      --_size;
+      return true;
+   }
+
+   bool erase(const T& x) {
+      for (iterator i = begin(); i != end(); ++i) {
+         if (x == *i) return erase(i);
+      }
+      return false;
+   }
+
+   iterator find(const T& x) {
+      for (iterator i = begin(); i != end(); ++i) {
+         if (x == *i) return i;
+      }
+      return end();
+   }
+
+   void clear() {
+      _size = 0;
+   }
 
    // [Optional TODO] Feel free to change, but DO NOT change ::sort()
    void sort() const { if (!empty()) ::sort(_data, _data+_size); }

@@ -6,5 +6,9 @@ adtp 0
 adtp -1
 adta -s ric
 adtq ric
+usage
 adtsort
+usage
 adtq ric
+usage
+q -f
