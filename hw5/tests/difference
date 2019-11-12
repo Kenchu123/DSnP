@@ -1,91 +1,95 @@
-=== Testing do1 ===
 === Testing do2 ===
 6c6
-< Total memory used: 1.832 M Bytes
+< Total memory used: 1.598 M Bytes
 ---
-> Total memory used: 1.758 M Bytes
+> Total memory used: 1.531 M Bytes
 1265c1265
-< Total memory used: 1.832 M Bytes
+< Total memory used: 1.598 M Bytes
 ---
-> Total memory used: 1.758 M Bytes
+> Total memory used: 1.531 M Bytes
 2524c2524
-< Total memory used: 1.832 M Bytes
+< Total memory used: 1.598 M Bytes
 ---
-> Total memory used: 1.758 M Bytes
-2531c2531
-< Total memory used: 1.832 M Bytes
+> Total memory used: 1.531 M Bytes
+2529,2531c2529,2531
+< Period time used : 0.21 seconds
+< Total time used  : 0.21 seconds
+< Total memory used: 1.598 M Bytes
 ---
-> Total memory used: 1.758 M Bytes
-3790c3790
-< Total memory used: 1.832 M Bytes
+> Period time used : 0.2 seconds
+> Total time used  : 0.2 seconds
+> Total memory used: 1.531 M Bytes
+3789,3790c3789,3790
+< Total time used  : 0.22 seconds
+< Total memory used: 1.598 M Bytes
 ---
-> Total memory used: 1.758 M Bytes
-5049c5049
-< Total memory used: 1.832 M Bytes
+> Total time used  : 0.21 seconds
+> Total memory used: 1.531 M Bytes
+5047,5049c5047,5049
+< Period time used : 0 seconds
+< Total time used  : 0.22 seconds
+< Total memory used: 1.598 M Bytes
 ---
-> Total memory used: 1.758 M Bytes
-5056,5058c5056,5058
-< Period time used : 0.01 seconds
-< Total time used  : 0.01 seconds
-< Total memory used: 4.566 M Bytes
+> Period time used : 0.02 seconds
+> Total time used  : 0.23 seconds
+> Total memory used: 1.531 M Bytes
+5057,5058c5057,5058
+< Total time used  : 0.22 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Total time used  : 0.23 seconds
+> Total memory used: 4.539 M Bytes
+17565,17567c17565,17567
+< Period time used : 0 seconds
+< Total time used  : 0.22 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Period time used : 0.06 seconds
+> Total time used  : 0.29 seconds
+> Total memory used: 4.539 M Bytes
+27576,27578c27576,27578
+< Period time used : 1.27 seconds
+< Total time used  : 1.49 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Period time used : 1.6 seconds
+> Total time used  : 1.89 seconds
+> Total memory used: 4.539 M Bytes
+27583,27585c27583,27585
+< Period time used : 15.99 seconds
+< Total time used  : 17.48 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Period time used : 13.55 seconds
+> Total time used  : 15.44 seconds
+> Total memory used: 4.539 M Bytes
+37592,37594c37592,37594
+< Period time used : 0.16 seconds
+< Total time used  : 17.64 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Period time used : 0.26 seconds
+> Total time used  : 15.7 seconds
+> Total memory used: 4.539 M Bytes
+37599,37601c37599,37601
+< Period time used : 1.13 seconds
+< Total time used  : 18.77 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Period time used : 1.14 seconds
+> Total time used  : 16.84 seconds
+> Total memory used: 4.539 M Bytes
+37607,37608c37607,37608
+< Total time used  : 18.77 seconds
+< Total memory used: 4.605 M Bytes
+---
+> Total time used  : 16.84 seconds
+> Total memory used: 4.539 M Bytes
+45115,45117c45115,45117
+< Period time used : 0.02 seconds
+< Total time used  : 18.79 seconds
+< Total memory used: 4.605 M Bytes
 ---
 > Period time used : 0 seconds
-> Total time used  : 0 seconds
-> Total memory used: 4.617 M Bytes
-17566,17567c17566,17567
-< Total time used  : 0.01 seconds
-< Total memory used: 4.566 M Bytes
----
-> Total time used  : 0 seconds
-> Total memory used: 4.617 M Bytes
-27577,27578c27577,27578
-< Total time used  : 0.02 seconds
-< Total memory used: 4.566 M Bytes
----
-> Total time used  : 0.01 seconds
-> Total memory used: 4.617 M Bytes
-27584,27585c27584,27585
-< Total time used  : 0.03 seconds
-< Total memory used: 4.566 M Bytes
----
-> Total time used  : 0.02 seconds
-> Total memory used: 4.617 M Bytes
-37593,37594c37593,37594
-< Total time used  : 0.03 seconds
-< Total memory used: 4.566 M Bytes
----
-> Total time used  : 0.02 seconds
-> Total memory used: 4.617 M Bytes
-37600,37601c37600,37601
-< Total time used  : 0.03 seconds
-< Total memory used: 4.566 M Bytes
----
-> Total time used  : 0.02 seconds
-> Total memory used: 4.617 M Bytes
-37606,37608c37606,37608
-< Period time used : 0.01 seconds
-< Total time used  : 0.04 seconds
-< Total memory used: 4.566 M Bytes
----
-> Period time used : 0 seconds
-> Total time used  : 0.02 seconds
-> Total memory used: 4.617 M Bytes
-45116,45117c45116,45117
-< Total time used  : 0.04 seconds
-< Total memory used: 4.566 M Bytes
----
-> Total time used  : 0.02 seconds
-> Total memory used: 4.617 M Bytes
-=== Testing do3 ===
-Error: "jord" is not found!
-Error: "jord" is not found!
-=== Testing do4 ===
-Error: "123" is not found!
-Error: "123" is not found!
-Error: "123" is not found!
-Error: "123" is not found!
-=== Testing do5 ===
-Error: "10000" is not a legal index!!
-Error: "-1" is not a legal index!!
-Error: "10000" is not a legal index!!
-Error: "-1" is not a legal index!!
+> Total time used  : 16.84 seconds
+> Total memory used: 4.539 M Bytes
