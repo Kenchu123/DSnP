@@ -35,7 +35,7 @@ public:
       ~iterator() {} // Should NOT delete _node
 
       // TODO: implement these overloaded operators
-      const T& operator * () const { return (*this); }
+      const T& operator * () const { return (*_node); }
       T& operator * () { return (*_node); }
       iterator& operator ++ () { ++_node; return (*this); }
       iterator operator ++ (int) { iterator ret = *this; ++(*this); return ret; }
@@ -96,10 +96,9 @@ public:
    }
 
    bool erase(const T& x) {
-      for (iterator i = begin(); i != end(); ++i) {
-         if (x == *i) return erase(i);
-      }
-      return false;
+      iterator found = find(x);
+      if (found == end()) return false;
+      return erase(found);
    }
 
    iterator find(const T& x) {
