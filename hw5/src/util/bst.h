@@ -48,9 +48,10 @@ class BSTree
 {
    public:
    BSTree() {
-      _root = new BSTreeNode<T>(T());
-      _root->_l = _root->_r = 0;
-      _dummy = new BSTreeNode<T>(T());
+      // _root = new BSTreeNode<T>(T());
+      // _root->_l = _root->_r = 0;
+      _root = 0;
+      _dummy = new BSTreeNode<T>(T("dummy"));
       _dummy->_l = _dummy->_r = _root;
    }
    ~BSTree() { clear(); delete _root; }
@@ -63,6 +64,7 @@ class BSTree
       iterator():_own(0), _node(0) {}
 
       iterator(const BSTree<T>* b, BSTreeNode<T>* n = 0): _own(b), _node(n) {
+         _trace.push_back({b->_dummy, LEFT});
          if (_node == 0) _node = b->_root;
          _addTrace(_node, b->_root);
       }
@@ -73,6 +75,10 @@ class BSTree
       const T& operator * () const { return _node->_data; }
       T& operator * () { return _node->_data; }
       iterator& operator ++ () {
+         // cout << "iterator++ trace: " << endl;
+         // for (auto i : _trace) {
+         //    cout << i.first->_data << " " << i.second << endl;
+         // }
          _trace.pop_back();
          if (_node->_r != 0) { // trace right
             _trace.emplace_back(_node, RIGHT);
@@ -85,7 +91,7 @@ class BSTree
               _node = _trace.back().first;
                _trace.back().second = CUR;
             }
-            else { // iterator to end()
+            else { // iterator to end() // maybe not used
                return this->end();
             }
          }
@@ -124,8 +130,10 @@ class BSTree
       bool operator == (const iterator& i) const { return _node == i._node; }
 
       iterator& begin() {
-         _node = _own->_root;
          _trace.clear();
+         if (_own->_root == 0) return end();
+         _trace.push_back({_own->_dummy, LEFT});
+         _node = _own->_root;
          _findMin(_node);
          return (*this);
       }
@@ -133,6 +141,7 @@ class BSTree
       iterator& end() {
          _trace.clear();
          _node = _own->_dummy;
+         _trace.push_back({_node, CUR});
          return (*this);
       }
 
@@ -179,8 +188,10 @@ class BSTree
    size_t size() const { return _size; }
 
    void insert(const T& x) {
+      // cout << "Inserting " << x << endl;
       if (_size == 0) {
-         _root->_data = x;
+         _root = new BSTreeNode<T>(x);
+         _dummy->_l = _dummy->_r = _root;
          _size += 1;
          return;
       }
@@ -200,17 +211,61 @@ class BSTree
       }
    }
 
-   void pop_front() { }
-   void pop_back() { }
-
-   bool erase(iterator pos) { return false; }
-   bool erase(const T& x) { return false; }
-
-   iterator find(const T& x) {
-
+   void pop_front() {
+      if (_size == 0) return;
+      erase(begin());
+   }
+   void pop_back() {
+      if (_size == 0) return;
+      erase(--end());
    }
 
-   void clear() { }  
+   bool erase(iterator pos) {
+      BSTreeNode<T>* tar = pos._node; // target node
+      // cout << endl << "iterator erase " << pos._node->_data << endl;
+      // for (auto i : pos._trace) cout << i.first->_data << " " << i.second << endl;
+      if (tar == _dummy || tar == 0) return false;
+      if (tar->_r) { // if have right child
+         pos._trace.back().second = RIGHT;
+         pos._node = pos._node->_r;
+         pos._findMin(pos._node);
+         tar->_data = pos._node->_data; // exchange the data with right subtree's min
+         tar = pos._node;
+         // for (auto i : pos._trace) cout << i.first->_data << " " << i.second << endl;
+      }
+      pos._trace.pop_back();
+      pair<BSTreeNode<T>*, TrStat> par = pos._trace.back(); // get parent
+      if (par.second == LEFT) par.first->_l = tar->_l == 0 ? tar->_r : tar->_l;
+      else if (par.second == RIGHT) par.first->_r = tar->_l == 0 ? tar->_r : tar->_l;
+      if (tar == _root) {
+         _root = tar->_l;
+         _dummy->_l = _dummy->_r = _root;
+      }
+      delete tar;
+      _size -= 1;
+      return true;
+   }
+   bool erase(const T& x) {
+      iterator found = find(x);
+      if (found._node != _dummy) return erase(found);
+      return false;
+   }
+
+   iterator find(const T& x) {
+      return find(x, _root);
+   }
+
+   iterator find(const T& x, BSTreeNode<T>* com) {
+      // cout << "Finding " << x << endl;
+      if (com == 0) return end();
+      if (x < com->_data) return find(x, com->_l);
+      else if (x > com->_data) return find(x, com->_r);
+      else return iterator(this, com);
+   }
+
+   void clear() {
+      while (_root != 0) pop_back();
+   }  
 
    void sort() const { } // do nothing because BST!
 
