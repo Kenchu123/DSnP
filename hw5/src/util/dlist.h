@@ -149,12 +149,14 @@ public:
    void clear() {// delete all nodes except for the dummy node
       while (!empty()) pop_front();
       _isSorted = false;
+      _head->_prev = _head->_next = _head;
    }  
 
    void sort() const {
       if (_isSorted) return;
       DListNode<T>* j = _head->_prev;
       size_t _s = size();
+      if (_s == 0) return;
       for (size_t k = 0; k < _s - 1; ++k, j = j->_prev) {
          for (DListNode<T>* i = _head; i->_next != j; i = i->_next) {
             if (i->_data > i->_next->_data) {

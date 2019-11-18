@@ -2,10 +2,10 @@
 # ../adtTest.bst -f do1 > out.mine
 # ../ref/adtTest.bst -f do1 > out.ref
 # colordiff out.mine out.ref
-echo "=== Testing do2 ==="
-../adtTest.bst -f do2 > out.mine
-../ref/adtTest.bst -f do2 > out.ref
-colordiff out.mine out.ref
+# echo "=== Testing do2 ==="
+# ../adtTest.bst -f do2 > out.mine
+# ../ref/adtTest.bst -f do2 > out.ref
+# colordiff out.mine out.ref
 # echo "=== Testing do3 ==="
 # ../adtTest.bst -f do3 > out.mine
 # ../ref/adtTest.bst -f do3 > out.ref
@@ -18,6 +18,19 @@ colordiff out.mine out.ref
 # ../adtTest.bst -f do5 > out.mine
 # ../ref/adtTest.bst -f do5 > out.ref
 # colordiff out.mine out.ref
+
+echo "=== Testing mydo ==="
+# ../adtTest.bst -f mydo > out.mine
+# ../ref/adtTest.bst -f mydo > out.ref
+# colordiff out.mine out.ref
+
+# ../adtTest.array -f mydo > out.mine
+# ../ref/adtTest.array -f mydo > out.ref
+# colordiff out.mine out.ref
+
+../ref/adtTest.dlist -f mydo > out.ref
+../adtTest.dlist -f mydo > out.mine
+colordiff out.mine out.ref
 
 # $1 -f do2
 # $1 -f do3
