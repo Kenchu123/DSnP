@@ -154,9 +154,8 @@ public:
 
    void sort() const {
       if (_isSorted) return;
+      if (empty()) return;
       DListNode<T>* j = _head->_prev;
-      size_t _s = size();
-      if (_s == 0) return;
       iterator be = begin(), en = --end();
       for (; be != en; ++be, j = j->_prev) {
          for (DListNode<T>* i = _head; i->_next != j; i = i->_next) {
