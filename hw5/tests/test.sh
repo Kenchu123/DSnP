@@ -3,8 +3,8 @@
 # ../ref/adtTest.bst -f do1 > out.ref
 # colordiff out.mine out.ref
 # echo "=== Testing do2 ==="
-# ../adtTest.bst -f do2 > out.mine
-# ../ref/adtTest.bst -f do2 > out.ref
+# ../adtTest.array -f do2 > out.mine
+# ../ref/adtTest.array -f do2 > out.ref
 # colordiff out.mine out.ref
 # echo "=== Testing do3 ==="
 # ../adtTest.bst -f do3 > out.mine
@@ -20,17 +20,24 @@
 # colordiff out.mine out.ref
 
 echo "=== Testing mydo ==="
-# ../adtTest.bst -f mydo > out.mine
-# ../ref/adtTest.bst -f mydo > out.ref
-# colordiff out.mine out.ref
 
-# ../adtTest.array -f mydo > out.mine
-# ../ref/adtTest.array -f mydo > out.ref
-# colordiff out.mine out.ref
+echo "== Testing array ref ==="
+../ref/adtTest.array -f mydo > array_out.ref
+echo "== Testing array mine ==="
+../adtTest.array -f mydo > array_out.mine
+colordiff array_out.mine array_out.ref > array_diff
 
-../ref/adtTest.dlist -f mydo > out.ref
-../adtTest.dlist -f mydo > out.mine
-colordiff out.mine out.ref
+echo "== Testing dlist ref ==="
+../ref/adtTest.dlist -f mydo > dlist_out.ref
+echo "== Testing dlist mine ==="
+../adtTest.dlist -f mydo > dlist_out.mine
+colordiff dlist_out.mine dlist_out.ref > dlist_diff
+
+echo "== Testing bst ref ==="
+../ref/adtTest.bst -f mydo > bst_out.ref
+echo "== Testing bst mine ==="
+../adtTest.bst -f mydo > bst_out.mine
+colordiff bst_out.mine bst_out.ref > bst_diff
 
 # $1 -f do2
 # $1 -f do3

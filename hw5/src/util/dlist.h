@@ -157,7 +157,8 @@ public:
       DListNode<T>* j = _head->_prev;
       size_t _s = size();
       if (_s == 0) return;
-      for (size_t k = 0; k < _s - 1; ++k, j = j->_prev) {
+      iterator be = begin(), en = --end();
+      for (; be != en; ++be, j = j->_prev) {
          for (DListNode<T>* i = _head; i->_next != j; i = i->_next) {
             if (i->_data > i->_next->_data) {
                T tmp = i->_data;

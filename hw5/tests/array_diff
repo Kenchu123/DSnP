@@ -1,0 +1,10 @@
+6,7c6,7
+< Period time used : 3.01 seconds
+< Total time used  : 3.01 seconds
+---
+> Period time used : 2.91 seconds
+> Total time used  : 2.91 seconds
+14c14
+< Total time used  : 3.12 seconds
+---
+> Total time used  : 3.02 seconds

@@ -1,0 +1,14 @@
+6,8c6,8
+< Period time used : 0.72 seconds
+< Total time used  : 0.72 seconds
+< Total memory used: 97.53 M Bytes
+---
+> Period time used : 0.74 seconds
+> Total time used  : 0.74 seconds
+> Total memory used: 97.48 M Bytes
+14,15c14,15
+< Total time used  : 0.72 seconds
+< Total memory used: 97.53 M Bytes
+---
+> Total time used  : 0.74 seconds
+> Total memory used: 97.48 M Bytes
