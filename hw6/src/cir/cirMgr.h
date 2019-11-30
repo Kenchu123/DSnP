@@ -13,9 +13,11 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <map>
 
 using namespace std;
 
+#include "cirGate.h"
 #include "cirDef.h"
 
 extern CirMgr *cirMgr;
@@ -24,25 +26,36 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr(){}
-   ~CirMgr() {}
+  CirMgr(){}
+  ~CirMgr() {}
 
-   // Access functions
-   // return '0' if "gid" corresponds to an undefined gate.
-   CirGate* getGate(unsigned gid) const { return 0; }
+  // Access functions
+  // return '0' if "gid" corresponds to an undefined gate.
+  CirGate* getGate(unsigned gid) const { return 0; }
 
-   // Member functions about circuit construction
-   bool readCircuit(const string&);
+  // Member functions about circuit construction
+  bool readCircuit(const string&);
 
-   // Member functions about circuit reporting
-   void printSummary() const;
-   void printNetlist() const;
-   void printPIs() const;
-   void printPOs() const;
-   void printFloatGates() const;
-   void writeAag(ostream&) const;
+
+  // Member functions about circuit reporting
+  void printSummary() const;
+  void printNetlist() const;
+  void printPIs() const;
+  void printPOs() const;
+  void printFloatGates() const;
+  void writeAag(ostream&) const;
 
 private:
+  bool readPI(int);
+  bool readPO(int, int);
+  bool readAIG(int, int, int);
+  bool readSymbI(int , const string&);
+  bool readSymbO(int, const string&);
+
+  vector<CirPiGate*> _pilist;
+  vector<CirPoGate*> _polist;
+  vector<CirAigGate*> _aiglist;
+  map<unsigned, CirGate*> _gatelist;
 };
 
 #endif // CIR_MGR_H

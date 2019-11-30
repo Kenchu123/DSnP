@@ -151,6 +151,44 @@ parseError(CirParseError err)
 bool
 CirMgr::readCircuit(const string& fileName)
 {
+   fstream file(fileName.c_str());
+   if (!file) { cerr << "Cannot open design \"" << fileName << "\"!!" << endl; return false; }
+   string type;
+   int M, I, L, O, A;
+   lineNo += 1;
+   file >> type >> M >> I >> L >> O >> A; // read first line
+   for (int i = 0;i < I; ++i) {
+      lineNo += 1;
+      int l; file >> l;
+      readPI(l);
+   }
+   for (int i = 0;i < O; ++i) {
+      lineNo += 1;
+      int l; file >> l;
+      readPO(l, M + i + 1);
+   }
+   for (int i = 0;i < A; ++i) {
+      lineNo += 1;
+      int l, s1, s2;
+      file >> l >> s1 >> s2;
+      readAIG(l, s1, s2);
+   }
+   // symbol
+   string ilo;
+   while (file >> ilo) {
+      lineNo += 1;
+      if (ilo == "c") break;
+      string symb; file >> symb;
+      int pos = stoi(ilo.substr(1));
+      if (ilo[0] == 'i') readSymbI(pos, symb);
+      else if (ilo[0] == 'o') readSymbO(pos, symb);
+      else if (ilo[0] == 'l') {}
+   }
+   // comment
+   string comment;
+   // todo
+   file.close();
+
    return true;
 }
 
@@ -169,6 +207,14 @@ Circuit Statistics
 void
 CirMgr::printSummary() const
 {
+   cout << endl;
+   cout << "Circuit Statistics" << endl;
+   cout << "==================" << endl;
+   cout << "  PI" << setw(12) << _pilist.size() << endl;
+   cout << "  PO" << setw(12) << _polist.size() << endl;
+   cout << "  AIG" << setw(11) << _aiglist.size() << endl;
+   cout << "------------------" << endl;
+   cout << "  Total" << setw(9) << _pilist.size() + _polist.size() + _aiglist.size() << endl;
 }
 
 void
@@ -180,6 +226,8 @@ void
 CirMgr::printPIs() const
 {
    cout << "PIs of the circuit:";
+   for (size_t i = 0;i < _pilist.size(); ++i) 
+      cout << _pilist[i]->getVar() << (i == _pilist.size() - 1 ? "" : " ");
    cout << endl;
 }
 
@@ -187,6 +235,8 @@ void
 CirMgr::printPOs() const
 {
    cout << "POs of the circuit:";
+   for (size_t i = 0;i < _polist.size(); ++i) 
+      cout << _polist[i]->getVar() << (i == _polist.size() - 1 ? "" : " ");
    cout << endl;
 }
 
@@ -199,3 +249,40 @@ void
 CirMgr::writeAag(ostream& outfile) const
 {
 }
+
+bool 
+CirMgr::readPI(int lit) {
+   cout << "line: " << lineNo << ", Reading PI " << lit << endl;
+   CirPiGate* newPi = new CirPiGate(lit, lineNo);
+   _pilist.push_back(newPi);
+   _gatelist[newPi->getVar()] = newPi;
+}
+
+bool 
+CirMgr::readPO(int lit, int var) {
+   cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
+    CirPoGate* newPo = new CirPoGate(lit, var, lineNo);
+    _polist.push_back(newPo);
+    _gatelist[newPo->getVar()] = newPo;
+}
+
+bool 
+CirMgr::readAIG(int lit, int src1, int src2) {
+   cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
+   CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
+   _aiglist.push_back(newAig);
+   _gatelist[newAig->getVar()] = newAig;
+}
+
+bool 
+CirMgr::readSymbI(int pos , const string& symb) {
+   cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
+
+}
+
+bool 
+CirMgr::readSymbO(int pos, const string& symb) {
+   cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
+
+}
+
