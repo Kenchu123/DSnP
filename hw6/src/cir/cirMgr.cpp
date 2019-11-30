@@ -24,6 +24,7 @@ using namespace std;
 /*   Global variable and enum  */
 /*******************************/
 CirMgr* cirMgr = 0;
+CirGate* CirMgr::Const0 = new CirGate(0, 0, CONST_GATE);
 
 enum CirParseError {
    EXTRA_SPACE,
@@ -160,18 +161,18 @@ CirMgr::readCircuit(const string& fileName)
    for (int i = 0;i < I; ++i) {
       lineNo += 1;
       int l; file >> l;
-      readPI(l);
+      _readPI(l);
    }
    for (int i = 0;i < O; ++i) {
       lineNo += 1;
       int l; file >> l;
-      readPO(l, M + i + 1);
+      _readPO(l, M + i + 1);
    }
    for (int i = 0;i < A; ++i) {
       lineNo += 1;
       int l, s1, s2;
       file >> l >> s1 >> s2;
-      readAIG(l, s1, s2);
+      _readAIG(l, s1, s2);
    }
    // symbol
    string ilo;
@@ -180,8 +181,8 @@ CirMgr::readCircuit(const string& fileName)
       if (ilo == "c") break;
       string symb; file >> symb;
       int pos = stoi(ilo.substr(1));
-      if (ilo[0] == 'i') readSymbI(pos, symb);
-      else if (ilo[0] == 'o') readSymbO(pos, symb);
+      if (ilo[0] == 'i') _readSymbI(pos, symb);
+      else if (ilo[0] == 'o') _readSymbO(pos, symb);
       else if (ilo[0] == 'l') {}
    }
    // comment
@@ -189,6 +190,8 @@ CirMgr::readCircuit(const string& fileName)
    // todo
    file.close();
 
+   // build connect
+   cirMgr->_buildConnect();
    return true;
 }
 
@@ -243,6 +246,31 @@ CirMgr::printPOs() const
 void
 CirMgr::printFloatGates() const
 {
+   vector<unsigned> fltFanins;
+   vector<unsigned> notUsed;
+   for (map<unsigned, CirGate*>::const_iterator it = _gatelist.begin(); it != _gatelist.end(); ++it) {
+      CirGate* gate = it->second;
+      if (gate->getType() == CONST_GATE || gate->getType() == UNDEF_GATE) continue;
+      for (auto i : gate->_fanin) {
+         if (i->getType() == UNDEF_GATE) {
+            fltFanins.push_back(gate->getVar());
+            break;
+         }
+      }
+
+      if ((gate->_fanout).empty() && gate->getType() != PO_GATE) notUsed.push_back(gate->getVar());
+   }
+
+   if (!fltFanins.empty()) {
+      cout << "Gates with floating fanin(s): ";
+      for (size_t i = 0;i < fltFanins.size(); ++i)
+         cout << fltFanins[i] << (i == fltFanins.size() - 1 ? "\n" : " ");
+   }
+   if (!notUsed.empty()) {
+      cout << "Gates defined but not used: ";
+      for (size_t i = 0;i < notUsed.size(); ++i)
+         cout << notUsed[i] << (i == notUsed.size() - 1 ? "\n" : " ");
+   }
 }
 
 void
@@ -251,7 +279,7 @@ CirMgr::writeAag(ostream& outfile) const
 }
 
 bool 
-CirMgr::readPI(int lit) {
+CirMgr::_readPI(int lit) {
    cout << "line: " << lineNo << ", Reading PI " << lit << endl;
    CirPiGate* newPi = new CirPiGate(lit, lineNo);
    _pilist.push_back(newPi);
@@ -259,7 +287,7 @@ CirMgr::readPI(int lit) {
 }
 
 bool 
-CirMgr::readPO(int lit, int var) {
+CirMgr::_readPO(int lit, int var) {
    cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
     CirPoGate* newPo = new CirPoGate(lit, var, lineNo);
     _polist.push_back(newPo);
@@ -267,7 +295,7 @@ CirMgr::readPO(int lit, int var) {
 }
 
 bool 
-CirMgr::readAIG(int lit, int src1, int src2) {
+CirMgr::_readAIG(int lit, int src1, int src2) {
    cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
    CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
    _aiglist.push_back(newAig);
@@ -275,14 +303,21 @@ CirMgr::readAIG(int lit, int src1, int src2) {
 }
 
 bool 
-CirMgr::readSymbI(int pos , const string& symb) {
+CirMgr::_readSymbI(int pos , const string& symb) {
    cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
 
 }
 
 bool 
-CirMgr::readSymbO(int pos, const string& symb) {
+CirMgr::_readSymbO(int pos, const string& symb) {
    cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
 
+}
+
+void
+CirMgr::_buildConnect() {
+   _gatelist[0] = Const0;
+   for (auto gate : _polist) gate->connect(_gatelist);
+   for (auto gate : _aiglist) gate->connect(_gatelist);
 }
 

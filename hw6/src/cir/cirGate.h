@@ -16,6 +16,7 @@
 
 using namespace std;
 
+class CirMgr;
 class CirGate;
 class CirPiGate;
 class CirPoGate;
@@ -29,16 +30,19 @@ class CirGate
 {
 public:
   CirGate() {}
+  CirGate(int var, int lineNo, GateType gateType): _var(var), _lineNo(lineNo), _gateType(gateType) {}
   virtual ~CirGate() {}
+  
+  friend class CirMgr;
 
   // Basic access methods
   string getTypeStr() const {
     switch(_gateType) {
-      case UNDEF_GATE: return "UNDEF_GATE";
-      case PI_GATE: return "PI_GATE";
-      case PO_GATE: return "PO_GATE";
-      case AIG_GATE: return "AIG_GATE";
-      case CONST_GATE: return "CONST_GATE";
+      case UNDEF_GATE: return "UNDEF";
+      case PI_GATE: return "PI";
+      case PO_GATE: return "PO";
+      case AIG_GATE: return "AIG";
+      case CONST_GATE: return "CONST";
       case TOT_GATE: return "TOT_GATE";
       default: return "";
     }
@@ -53,6 +57,9 @@ public:
   void reportFanout(int level) const;
 
   unsigned getVar() { return _var; }
+  GateType getType() { return _gateType; }
+
+  void connect(map<unsigned, CirGate*>&);
 
 private:
 
@@ -63,7 +70,7 @@ protected:
   vector<CirGate*> _fanin;
   vector<CirGate*> _fanout;
   vector<bool> _inv;
-
+  string _symbo;
 };
 
 class CirPiGate : public CirGate
@@ -74,6 +81,7 @@ public:
     _gateType = PI_GATE;
     _lineNo = lineNo;
     _var = lit / 2;
+    _symbo = "";
   }
 };
 
@@ -90,6 +98,7 @@ public:
 
     size_t* srcVar = new size_t(srclit / 2);
     _fanin.push_back((CirGate*)srcVar);
+    _symbo = "";
   }
 };
 
@@ -109,6 +118,7 @@ public:
     size_t* var2 = new size_t(src2 / 2);
     _fanin.push_back((CirGate*)var1);
     _fanin.push_back((CirGate*)var2);
+    _symbo = "";
   }
 };
 
