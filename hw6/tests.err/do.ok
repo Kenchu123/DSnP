@@ -1,12 +1,111 @@
 cirr ok01.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 7 -fanin 1
+cirg 7 -fanout 4
 cirr ok02.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 1 -fanout 3
+cirg 10 -fanin 3
 cirr ok03.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 7 -fanin 2
+cirg 1 -fanout 2
 cirr ok04.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 9 -fanin 10
+cirg 3 -fanout 4
 cirr ok05.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 1 -fanin 3
+cirg 6 -fanout 4
 cirr ok06.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 9 -fanin 3
+cirg 2 -fanout 4
 cirr ok07.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 6 -fanin 3
+cirg 1 -fanout 4
 cirr ok08.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 8 -fanin 0
+cirg 2 -fanout 2
 cirr ok09.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 6 -fanin 2
+cirg 1 -fanout 4
 cirr ok10.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 3 -fanin 4
+cirg 3 -fanout 4
 cirr ok11.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 3 -fanin 3
+cirg 0 -fanout 4
 cirr good.aag -replace
+cirp
+cirp -sum
+cirp -n
+cirp -pi
+cirp -po
+cirp -fl
+cirg 8 -fanin 3
+cirg 2 -fanout 4
+
+q -f
+

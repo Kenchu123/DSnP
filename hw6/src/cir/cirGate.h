@@ -31,8 +31,8 @@ class CirGate
 public:
   CirGate() {}
   CirGate(int var, int lineNo, GateType gateType): _var(var), _lineNo(lineNo), _gateType(gateType) {}
-  virtual ~CirGate() {}
-  
+  virtual ~CirGate() { reset(); }
+
   friend class CirMgr;
 
   // Basic access methods
@@ -61,7 +61,22 @@ public:
 
   void connect(map<unsigned, CirGate*>&);
 
+  void addSymbol(const string& symb) {
+    _symbo = symb;
+  }
+
+  bool isGlobalRef() { return _ref == _globalRef; }
+  void setToGlobalRef() { _ref = _globalRef; }
+  static void setGlobalRef() { ++_globalRef; }
+
+  void reset();
+
 private:
+  static unsigned _globalRef;
+  unsigned _ref;
+
+  void _dfsFanin(const CirGate*, unsigned, bool, int) const;
+  void _dfsFanout(const CirGate*, unsigned, bool, int) const;
 
 protected:
   GateType _gateType;
@@ -69,7 +84,8 @@ protected:
   unsigned _lineNo;
   vector<CirGate*> _fanin;
   vector<CirGate*> _fanout;
-  vector<bool> _inv;
+  vector<bool> _inv; // input inverse
+  vector<bool> _outv; // output inverse
   string _symbo;
 };
 
@@ -83,6 +99,7 @@ public:
     _var = lit / 2;
     _symbo = "";
   }
+  ~CirPiGate() { reset(); }
 };
 
 class CirPoGate : public CirGate
@@ -100,6 +117,7 @@ public:
     _fanin.push_back((CirGate*)srcVar);
     _symbo = "";
   }
+  ~CirPoGate() { reset(); }
 };
 
 class CirAigGate : public CirGate
@@ -120,6 +138,7 @@ public:
     _fanin.push_back((CirGate*)var2);
     _symbo = "";
   }
+  ~CirAigGate() { reset(); }
 };
 
 #endif // CIR_GATE_H

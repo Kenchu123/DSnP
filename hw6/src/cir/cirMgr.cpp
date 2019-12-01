@@ -179,7 +179,9 @@ CirMgr::readCircuit(const string& fileName)
    while (file >> ilo) {
       lineNo += 1;
       if (ilo == "c") break;
-      string symb; file >> symb;
+      string symb;
+      char space; file.get(space);
+      getline(file, symb);
       int pos = stoi(ilo.substr(1));
       if (ilo[0] == 'i') _readSymbI(pos, symb);
       else if (ilo[0] == 'o') _readSymbO(pos, symb);
@@ -213,16 +215,28 @@ CirMgr::printSummary() const
    cout << endl;
    cout << "Circuit Statistics" << endl;
    cout << "==================" << endl;
-   cout << "  PI" << setw(12) << _pilist.size() << endl;
-   cout << "  PO" << setw(12) << _polist.size() << endl;
-   cout << "  AIG" << setw(11) << _aiglist.size() << endl;
+   cout << "  PI" << right << setw(12) << _pilist.size() << endl;
+   cout << "  PO" << right << setw(12) << _polist.size() << endl;
+   cout << "  AIG" << right << setw(11) << _aiglist.size() << endl;
    cout << "------------------" << endl;
-   cout << "  Total" << setw(9) << _pilist.size() + _polist.size() + _aiglist.size() << endl;
+   cout << "  Total" << right << setw(9) << _pilist.size() + _polist.size() + _aiglist.size() << endl;
 }
 
 void
 CirMgr::printNetlist() const
 {
+   cout << endl;
+   for (size_t i = 0;i < _dfslist.size(); ++i) {
+      CirGate* g = _dfslist[i];
+      cout << "[" << i << "] ";
+      cout << left << setw(4) << g->getTypeStr() << g->_var;
+      for (size_t j = 0;j < g->_fanin.size(); ++j) {
+         cout << " " << (g->_fanin[j]->_gateType == UNDEF_GATE ? "*" : "") \
+            << (g->_inv[j] ? "!" : "") << g->_fanin[j]->_var;
+      }
+      if (g->_symbo != "") cout << " (" << g->_symbo << ")";
+      cout << endl;
+   }
 }
 
 void
@@ -230,7 +244,7 @@ CirMgr::printPIs() const
 {
    cout << "PIs of the circuit:";
    for (size_t i = 0;i < _pilist.size(); ++i) 
-      cout << _pilist[i]->getVar() << (i == _pilist.size() - 1 ? "" : " ");
+      cout << " " << _pilist[i]->getVar();
    cout << endl;
 }
 
@@ -239,7 +253,7 @@ CirMgr::printPOs() const
 {
    cout << "POs of the circuit:";
    for (size_t i = 0;i < _polist.size(); ++i) 
-      cout << _polist[i]->getVar() << (i == _polist.size() - 1 ? "" : " ");
+      cout << " " << _polist[i]->getVar();
    cout << endl;
 }
 
@@ -262,14 +276,16 @@ CirMgr::printFloatGates() const
    }
 
    if (!fltFanins.empty()) {
-      cout << "Gates with floating fanin(s): ";
+      cout << "Gates with floating fanin(s):";
       for (size_t i = 0;i < fltFanins.size(); ++i)
-         cout << fltFanins[i] << (i == fltFanins.size() - 1 ? "\n" : " ");
+         cout << " " << fltFanins[i];
+      cout << endl;
    }
    if (!notUsed.empty()) {
-      cout << "Gates defined but not used: ";
+      cout << "Gates defined but not used  :";
       for (size_t i = 0;i < notUsed.size(); ++i)
-         cout << notUsed[i] << (i == notUsed.size() - 1 ? "\n" : " ");
+         cout << " " << notUsed[i];
+      cout << endl;
    }
 }
 
@@ -280,7 +296,7 @@ CirMgr::writeAag(ostream& outfile) const
 
 bool 
 CirMgr::_readPI(int lit) {
-   cout << "line: " << lineNo << ", Reading PI " << lit << endl;
+   // cout << "line: " << lineNo << ", Reading PI " << lit << endl;
    CirPiGate* newPi = new CirPiGate(lit, lineNo);
    _pilist.push_back(newPi);
    _gatelist[newPi->getVar()] = newPi;
@@ -288,7 +304,7 @@ CirMgr::_readPI(int lit) {
 
 bool 
 CirMgr::_readPO(int lit, int var) {
-   cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
+   // cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
     CirPoGate* newPo = new CirPoGate(lit, var, lineNo);
     _polist.push_back(newPo);
     _gatelist[newPo->getVar()] = newPo;
@@ -296,7 +312,7 @@ CirMgr::_readPO(int lit, int var) {
 
 bool 
 CirMgr::_readAIG(int lit, int src1, int src2) {
-   cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
+   // cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
    CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
    _aiglist.push_back(newAig);
    _gatelist[newAig->getVar()] = newAig;
@@ -304,14 +320,14 @@ CirMgr::_readAIG(int lit, int src1, int src2) {
 
 bool 
 CirMgr::_readSymbI(int pos , const string& symb) {
-   cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
-
+   // cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
+   _pilist[pos]->addSymbol(symb);
 }
 
 bool 
 CirMgr::_readSymbO(int pos, const string& symb) {
-   cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
-
+   // cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
+   _polist[pos]->addSymbol(symb);
 }
 
 void
@@ -319,5 +335,39 @@ CirMgr::_buildConnect() {
    _gatelist[0] = Const0;
    for (auto gate : _polist) gate->connect(_gatelist);
    for (auto gate : _aiglist) gate->connect(_gatelist);
+   genDFSList();
 }
 
+void
+CirMgr::genDFSList() {
+   CirGate::setGlobalRef();
+   for (size_t i = 0;i < _polist.size(); ++i) _dfs(_polist[i]);
+}
+
+void
+CirMgr::_dfs(CirGate* gate) {
+   // cout << "DFS Gate: " << gate->_var << endl;
+   gate->setToGlobalRef();
+   for (size_t i = 0;i < gate->_fanin.size(); ++i) {
+      if (!gate->_fanin[i]->isGlobalRef()) {
+         _dfs(gate->_fanin[i]);
+      }
+   }
+   if (gate->_gateType != UNDEF_GATE) _dfslist.push_back(gate);
+}
+
+void
+CirMgr::reset() {
+   _pilist.clear();
+   _polist.clear();
+   _aiglist.clear();
+   _dfslist.clear();
+   for (map<unsigned, CirGate*>::iterator it = _gatelist.begin(); it != _gatelist.end(); ++it) {
+      delete it->second;
+   }
+   _gatelist.clear();
+   CirMgr::Const0 = new CirGate(0, 0, CONST_GATE);
+
+   lineNo = 0;
+   colNo = 0;
+}

@@ -25,12 +25,15 @@ extern CirMgr *cirMgr;
 /**************************************/
 /*   class CirGate member functions   */
 /**************************************/
+unsigned CirGate::_globalRef = 0;
+
 void
 CirGate::reportGate() const
 {
    cout << "==================================================" << endl;
-   string s = "= " + getTypeStr() + "(" + to_string(_var) + "), line " + _symbo + to_string(_lineNo);
-   cout << s << setw(50 - s.size()) << "=" << endl;
+   string s = "= " + getTypeStr() + "(" + to_string(_var) + ")" \
+      + (_symbo == "" ? "" : "\"" + _symbo + "\"") + ", line " + to_string(_lineNo);
+   cout << s << right << setw(50 - s.size()) << "=" << endl;
    cout << "==================================================" << endl;
 }
 
@@ -38,12 +41,32 @@ void
 CirGate::reportFanin(int level) const
 {
    assert (level >= 0);
+   _dfsFanin(this, 0, 0, level);
+}
+
+void
+CirGate::_dfsFanin(const CirGate* g, unsigned spaces, bool inv, int level) const {
+   if (level < 0) return;
+   for (size_t i = 0; i < spaces; ++i) cout << " ";
+   if (inv) cout << "!";
+   cout << g->getTypeStr() << " " << g->_var << endl;
+   for (size_t i = 0; i < g->_fanin.size(); ++i) _dfsFanin(g->_fanin[i], spaces + 2, g->_inv[i], level - 1);
 }
 
 void
 CirGate::reportFanout(int level) const
 {
    assert (level >= 0);
+   _dfsFanout(this, 0, 0, level);
+}
+
+void
+CirGate::_dfsFanout(const CirGate* g, unsigned spaces, bool inv, int level) const {
+   if (level < 0) return;
+   for (size_t i = 0; i < spaces; ++i) cout << " ";
+   if (inv) cout << "!";
+   cout << g->getTypeStr() << " " << g->_var << endl;
+   for (size_t i = 0; i < g->_fanout.size(); ++i) _dfsFanout(g->_fanout[i], spaces + 2, g->_outv[i], level - 1);
 }
 
  void 
@@ -51,15 +74,24 @@ CirGate::reportFanout(int level) const
     for (size_t i = 0;i < _fanin.size(); ++i) {
       size_t inVar = *(size_t*)_fanin[i];
       //  delete in;
-      cout << _var << " is Connecting to " << inVar << endl;
+      // cout << _var << " is Connecting to " << inVar << endl;
        if (gatelist.find(inVar) == gatelist.end()) {
           // floating
-          cout << "floating " << inVar << endl;
+         //  cout << "floating " << inVar << endl;
           CirGate* floatGate = new CirGate(inVar, 0, UNDEF_GATE);
           gatelist[inVar] = floatGate;
        }
       // set _fanin and _fanout
       _fanin[i] = gatelist[inVar];
       _fanin[i]->_fanout.push_back(this);
+      _fanin[i]->_outv.push_back(_inv[i]);
     }
+ }
+
+ void
+ CirGate::reset() {
+    _fanin.clear();
+    _fanout.clear();
+    _inv.clear();
+    _outv.clear();
  }

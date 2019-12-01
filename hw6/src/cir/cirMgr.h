@@ -27,7 +27,7 @@ class CirMgr
 {
 public:
   CirMgr(){}
-  ~CirMgr() {}
+  ~CirMgr() { reset(); }
 
   // Access functions
   // return '0' if "gid" corresponds to an undefined gate.
@@ -39,7 +39,6 @@ public:
   // Member functions about circuit construction
   bool readCircuit(const string&);
 
-
   // Member functions about circuit reporting
   void printSummary() const;
   void printNetlist() const;
@@ -48,8 +47,14 @@ public:
   void printFloatGates() const;
   void writeAag(ostream&) const;
 
-  // const0 gate
+  // Member functions about circuit DFS
+  void genDFSList();
+
+  // CONST 0 gate
   static CirGate* Const0;
+
+  // reseting
+  void reset();
 
 private:
   bool _readPI(int);
@@ -58,10 +63,12 @@ private:
   bool _readSymbI(int , const string&);
   bool _readSymbO(int, const string&);
   void _buildConnect();
+  void _dfs(CirGate*);
 
   vector<CirPiGate*> _pilist;
   vector<CirPoGate*> _polist;
   vector<CirAigGate*> _aiglist;
+  vector<CirGate*> _dfslist;
   map<unsigned, CirGate*> _gatelist;
 };
 
