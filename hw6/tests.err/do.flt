@@ -2,28 +2,35 @@ cirr flt01.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 cirr flt02.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 cirr flt03.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 cirr flt04.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 cirr flt05.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 cirr flt06.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 cirr flt07.aag -replace
 cirp
 cirp -n
 cirp -fl
+cirw
 q -f

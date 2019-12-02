@@ -154,21 +154,19 @@ CirMgr::readCircuit(const string& fileName)
 {
    fstream file(fileName.c_str());
    if (!file) { cerr << "Cannot open design \"" << fileName << "\"!!" << endl; return false; }
-   string type;
-   int M, I, L, O, A;
    lineNo += 1;
-   file >> type >> M >> I >> L >> O >> A; // read first line
-   for (int i = 0;i < I; ++i) {
+   file >> _type >> _M >> _I >> _L >> _O >> _A; // read first line
+   for (int i = 0;i < _I; ++i) {
       lineNo += 1;
       int l; file >> l;
       _readPI(l);
    }
-   for (int i = 0;i < O; ++i) {
+   for (int i = 0;i < _O; ++i) {
       lineNo += 1;
       int l; file >> l;
-      _readPO(l, M + i + 1);
+      _readPO(l, _M + i + 1);
    }
-   for (int i = 0;i < A; ++i) {
+   for (int i = 0;i < _A; ++i) {
       lineNo += 1;
       int l, s1, s2;
       file >> l >> s1 >> s2;
@@ -178,7 +176,7 @@ CirMgr::readCircuit(const string& fileName)
    string ilo;
    while (file >> ilo) {
       lineNo += 1;
-      if (ilo == "c") break;
+      if (ilo == "c") { _doComment = 1; break; }
       string symb;
       char space; file.get(space);
       getline(file, symb);
@@ -186,9 +184,15 @@ CirMgr::readCircuit(const string& fileName)
       if (ilo[0] == 'i') _readSymbI(pos, symb);
       else if (ilo[0] == 'o') _readSymbO(pos, symb);
       else if (ilo[0] == 'l') {}
+      ilos.push_back(ilo);
+      symbols.push_back(symb);
    }
    // comment
-   string comment;
+   if (_doComment) {
+      char ch;
+      while (file.get(ch)) _comment += ch;
+   }
+
    // todo
    file.close();
 
@@ -292,6 +296,31 @@ CirMgr::printFloatGates() const
 void
 CirMgr::writeAag(ostream& outfile) const
 {
+   outfile << _type << " " << _M << " " << _I << " " \
+      << _L << " " << _O << " ";
+   // count AIG in _dfslist
+   int validA = 0;
+   for (auto i : _dfslist) if (i->_gateType == AIG_GATE) ++validA;
+   cout << validA << endl;
+
+   for (auto i : _pilist) outfile << i->_var * 2 << endl;
+   for (auto i : _polist) {
+      outfile << i->_fanin[0]->_var * 2 + int(i->_inv[0]) << endl;
+   }
+   for (auto i : _dfslist) {
+      if (i->_gateType == AIG_GATE) {
+         outfile << i->_var * 2;
+         for (size_t j = 0;j < i->_fanin.size(); ++j) {
+            outfile << " " << i->_fanin[j]->_var * 2 + int(i->_inv[j]);
+         }
+         outfile << endl;
+      }
+   }
+   for (size_t i = 0;i < ilos.size(); ++i) {
+      outfile << ilos[i] << " " << symbols[i] << endl;
+   }
+   string myComment = "AAG output by Che-Kuang (Ken) Chu";
+   outfile << "c\n" << myComment << endl;
 }
 
 bool 
@@ -367,6 +396,11 @@ CirMgr::reset() {
    }
    _gatelist.clear();
    CirMgr::Const0 = new CirGate(0, 0, CONST_GATE);
+
+   _M = _I = _L = _O = _A = 0;
+   ilos.clear(); symbols.clear();
+   _doComment = 0;
+   _comment = _type = "";
 
    lineNo = 0;
    colNo = 0;

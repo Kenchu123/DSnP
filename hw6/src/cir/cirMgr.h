@@ -26,7 +26,7 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-  CirMgr(){}
+  CirMgr(): _M(0), _I(0), _L(0), _O(0), _A(0), _doComment(0), _comment(""), _type("") {}
   ~CirMgr() { reset(); }
 
   // Access functions
@@ -65,6 +65,13 @@ private:
   void _buildConnect();
   void _dfs(CirGate*);
 
+  bool _doComment;
+  string _comment;
+  string _type;
+  vector <string> ilos;
+  vector <string> symbols;
+
+  int _M, _I, _L, _O, _A;
   vector<CirPiGate*> _pilist;
   vector<CirPoGate*> _polist;
   vector<CirAigGate*> _aiglist;

@@ -7,6 +7,7 @@ cirp -po
 cirp -fl
 cirg 7 -fanin 1
 cirg 7 -fanout 4
+cirw
 cirr ok02.aag -replace
 cirp
 cirp -sum
@@ -16,6 +17,7 @@ cirp -po
 cirp -fl
 cirg 1 -fanout 3
 cirg 10 -fanin 3
+cirw
 cirr ok03.aag -replace
 cirp
 cirp -sum
@@ -25,6 +27,7 @@ cirp -po
 cirp -fl
 cirg 7 -fanin 2
 cirg 1 -fanout 2
+cirw
 cirr ok04.aag -replace
 cirp
 cirp -sum
@@ -34,6 +37,7 @@ cirp -po
 cirp -fl
 cirg 9 -fanin 10
 cirg 3 -fanout 4
+cirw
 cirr ok05.aag -replace
 cirp
 cirp -sum
@@ -43,6 +47,7 @@ cirp -po
 cirp -fl
 cirg 1 -fanin 3
 cirg 6 -fanout 4
+cirw
 cirr ok06.aag -replace
 cirp
 cirp -sum
@@ -52,6 +57,7 @@ cirp -po
 cirp -fl
 cirg 9 -fanin 3
 cirg 2 -fanout 4
+cirw
 cirr ok07.aag -replace
 cirp
 cirp -sum
@@ -61,6 +67,7 @@ cirp -po
 cirp -fl
 cirg 6 -fanin 3
 cirg 1 -fanout 4
+cirw
 cirr ok08.aag -replace
 cirp
 cirp -sum
@@ -79,6 +86,7 @@ cirp -po
 cirp -fl
 cirg 6 -fanin 2
 cirg 1 -fanout 4
+cirw
 cirr ok10.aag -replace
 cirp
 cirp -sum
@@ -88,6 +96,7 @@ cirp -po
 cirp -fl
 cirg 3 -fanin 4
 cirg 3 -fanout 4
+cirw
 cirr ok11.aag -replace
 cirp
 cirp -sum
@@ -97,6 +106,7 @@ cirp -po
 cirp -fl
 cirg 3 -fanin 3
 cirg 0 -fanout 4
+cirw
 cirr good.aag -replace
 cirp
 cirp -sum
@@ -106,6 +116,6 @@ cirp -po
 cirp -fl
 cirg 8 -fanin 3
 cirg 2 -fanout 4
-
+cirw
 q -f
 
