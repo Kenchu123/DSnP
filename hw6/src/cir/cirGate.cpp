@@ -38,35 +38,56 @@ CirGate::reportGate() const
 }
 
 void
-CirGate::reportFanin(int level) const
+CirGate::reportFanin(int level)
 {
    assert (level >= 0);
+   setGlobalRef();
    _dfsFanin(this, 0, 0, level);
 }
 
 void
-CirGate::_dfsFanin(const CirGate* g, unsigned spaces, bool inv, int level) const {
+CirGate::_dfsFanin(CirGate* g, unsigned spaces, bool inv, int level) {
    if (level < 0) return;
+
    for (size_t i = 0; i < spaces; ++i) cout << " ";
    if (inv) cout << "!";
-   cout << g->getTypeStr() << " " << g->_var << endl;
-   for (size_t i = 0; i < g->_fanin.size(); ++i) _dfsFanin(g->_fanin[i], spaces + 2, g->_inv[i], level - 1);
+   cout << g->getTypeStr() << " " << g->_var;
+   // check if need to add (*)
+   if (g->isGlobalRef() && level > 0 && !g->_fanin.empty()) {
+      cout << " (*)" << endl; return;
+   }
+   else cout << endl;
+   // dfs next level
+   g->setToGlobalRef();
+   for (size_t i = 0; i < g->_fanin.size(); ++i) {
+      _dfsFanin(g->_fanin[i], spaces + 2, g->_inv[i], level - 1);
+   }
 }
 
 void
-CirGate::reportFanout(int level) const
+CirGate::reportFanout(int level)
 {
    assert (level >= 0);
+   setGlobalRef();
    _dfsFanout(this, 0, 0, level);
 }
 
 void
-CirGate::_dfsFanout(const CirGate* g, unsigned spaces, bool inv, int level) const {
+CirGate::_dfsFanout(CirGate* g, unsigned spaces, bool inv, int level) {
    if (level < 0) return;
    for (size_t i = 0; i < spaces; ++i) cout << " ";
    if (inv) cout << "!";
-   cout << g->getTypeStr() << " " << g->_var << endl;
-   for (size_t i = 0; i < g->_fanout.size(); ++i) _dfsFanout(g->_fanout[i], spaces + 2, g->_outv[i], level - 1);
+   cout << g->getTypeStr() << " " << g->_var;
+   // check if need to add (*)
+   if (g->isGlobalRef() && level > 0 && !g->_fanout.empty()) {
+      cout << " (*)" << endl; return;
+   }
+   else cout << endl;
+   // dfs next level
+   g->setToGlobalRef();
+   for (size_t i = 0; i < g->_fanout.size(); ++i) {
+      _dfsFanout(g->_fanout[i], spaces + 2, g->_outv[i], level - 1);
+   }
 }
 
  void 

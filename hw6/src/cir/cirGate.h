@@ -51,10 +51,10 @@ public:
 
   // Printing functions
   // virtual void printGate() const = 0;
-  virtual void printGate() {} // this is I add
+  void printGate() {} // this is I add
   void reportGate() const;
-  void reportFanin(int level) const;
-  void reportFanout(int level) const;
+  void reportFanin(int level);
+  void reportFanout(int level);
 
   unsigned getVar() { return _var; }
   GateType getType() { return _gateType; }
@@ -75,8 +75,8 @@ private:
   static unsigned _globalRef;
   unsigned _ref;
 
-  void _dfsFanin(const CirGate*, unsigned, bool, int) const;
-  void _dfsFanout(const CirGate*, unsigned, bool, int) const;
+  void _dfsFanin(CirGate*, unsigned, bool, int);
+  void _dfsFanout(CirGate*, unsigned, bool, int);
 
 protected:
   GateType _gateType;

@@ -1,17 +1,12 @@
-cirr test.aag
+cirr tests.fraig/test2.aag
 cirp
 cirp -pi
 cirp -po
 cirp -sum
 cirp -fl
 cirp -n
-cirg 22 -fanin 3
-cirg 10 -fanin 3
-cirg 10 -fanout 3
-cirg 0
-cirg 15
-cirg 1
-cirg 6
-cirg 22
+cirg 12
+cirg 17 -fanin 14
+cirg 1 -fanout 4
 q -f
 
