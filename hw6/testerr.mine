@@ -1,0 +1,152 @@
+cir> cirr err01.aag
+[ERROR] Line 1, Col 1: Extra space character is detected!!
+
+cir> cirr err02.aag
+[ERROR] Line 1, Col 1: Illegal white space char(9) is detected!!
+
+cir> cirr err03.aag
+[ERROR] Line 1, Col 5: Extra space character is detected!!
+
+cir> cirr err04.aag
+[ERROR] Line 1, Col 4: Missing space character!!
+
+cir> cirr err05.aag
+[ERROR] Line 1: Illegal identifier "aagasd"!!
+
+cir> cirr err06.aag
+[ERROR] Line 1, Col 5: Illegal white space char(9) is detected!!
+
+cir> cirr err07.aag
+[ERROR] Line 1, Col 5: Missing number of variables!!
+
+cir> cirr err08.aag
+[ERROR] Line 1, Col 11: Extra space character is detected!!
+
+cir> cirr err09.aag
+[ERROR] Line 1, Col 10: Missing space character!!
+
+cir> cirr err10.aag
+[ERROR] Line 1, Col 10: Missing space character!!
+
+cir> cirr err11.aag
+[ERROR] Line 1, Col 14: A new line is expected here!!
+
+cir> cirr err12.aag
+[ERROR] Line 1, Col 14: A new line is expected here!!
+
+cir> cirr err13.aag
+[ERROR] Line 1: variables is too small (3)!!
+
+cir> cirr err14.aag
+[Error] Line 1: Illegal latches!!
+
+cir> cirr err15.aag
+
+cir> cirr err16.aag
+
+cir> cirr err17.aag
+
+cir> cirr err18.aag
+
+cir> cirr err19.aag
+
+cir> cirr err20.aag
+
+cir> cirr err21.aag
+
+cir> cirr err22.aag
+
+cir> cirr err23.aag
+
+cir> cirr err24.aag
+
+cir> cirr err25.aag
+
+cir> cirr err26.aag
+
+cir> cirr err27.aag
+
+cir> cirr err28.aag
+
+cir> cirr err29.aag
+
+cir> cirr err30.aag
+
+cir> cirr err31.aag
+
+cir> cirr err32.aag
+
+cir> cirr err33.aag
+
+cir> cirr err34.aag
+
+cir> cirr err35.aag
+
+cir> cirr err36.aag
+
+cir> cirr err37.aag
+
+cir> cirr err38.aag
+
+cir> cirr err39.aag
+
+cir> cirr err40.aag
+
+cir> cirr err41.aag
+
+cir> cirr err42.aag
+
+cir> cirr err43.aag
+
+cir> cirr err44.aag
+
+cir> cirr err45.aag
+
+cir> cirr err46.aag
+
+cir> cirr err47.aag
+
+cir> cirr err48.aag
+
+cir> cirr err49.aag
+
+cir> cirr err50.aag
+
+cir> cirr err51.aag
+
+cir> cirr err52.aag
+
+cir> cirr err53.aag
+
+cir> cirr err54.aag
+
+cir> cirr err55.aag
+
+cir> cirr err56.aag
+
+cir> cirr err57.aag
+[ERROR] Line 1: variables is too small (2)!!
+
+cir> cirr err58.aag
+[ERROR] Line 1, Col 4: Missing space character!!
+
+cir> cirr err59.aag
+[ERROR] Line 1: Illegal number of AIGs(a2)!!
+
+cir> cirr err60.aag
+[ERROR] Line 1: Missing "aag"!!
+
+cir> cirr err61.aag
+
+cir> cirr err62.aag
+
+cir> cirr err63.aag
+Cannot open design "err63.aag"!!
+
+cir> cirr good.aag
+
+cir> cirp
+Error: circuit is not yet constructed!!
+
+cir> q -f
+

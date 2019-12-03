@@ -57,13 +57,22 @@ public:
   void reset();
 
 private:
+  // for parsing
+  bool _readInitial(fstream&);
   bool _readPI(int);
   bool _readPO(int, int);
   bool _readAIG(int, int, int);
   bool _readSymbI(int , const string&);
   bool _readSymbO(int, const string&);
+
+  bool _notSpace(char);
+  bool _beSpace(char);
+  bool _readNum(string&, int&, string);
+
   void _buildConnect();
   void _dfs(CirGate*);
+
+
 
   bool _doComment;
   string _comment;

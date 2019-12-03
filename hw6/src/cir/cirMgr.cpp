@@ -49,6 +49,7 @@ enum CirParseError {
    DUMMY_END
 };
 
+
 /**************************************/
 /*   Static varaibles and functions   */
 /**************************************/
@@ -154,53 +155,124 @@ CirMgr::readCircuit(const string& fileName)
 {
    fstream file(fileName.c_str());
    if (!file) { cerr << "Cannot open design \"" << fileName << "\"!!" << endl; return false; }
-   lineNo += 1;
-   file >> _type >> _M >> _I >> _L >> _O >> _A; // read first line
-   for (int i = 0;i < _I; ++i) {
-      lineNo += 1;
-      int l; file >> l;
-      _readPI(l);
-   }
-   for (int i = 0;i < _O; ++i) {
-      lineNo += 1;
-      int l; file >> l;
-      _readPO(l, _M + i + 1);
-   }
-   for (int i = 0;i < _A; ++i) {
-      lineNo += 1;
-      int l, s1, s2;
-      file >> l >> s1 >> s2;
-      _readAIG(l, s1, s2);
-   }
-   // symbol
-   string ilo;
-   while (file >> ilo) {
-      lineNo += 1;
-      if (ilo == "c") { _doComment = 1; break; }
-      string symb;
-      char space; file.get(space);
-      getline(file, symb);
-      int pos = stoi(ilo.substr(1));
-      if (ilo[0] == 'i') _readSymbI(pos, symb);
-      else if (ilo[0] == 'o') _readSymbO(pos, symb);
-      else if (ilo[0] == 'l') {}
-      ilos.push_back(ilo);
-      symbols.push_back(symb);
-   }
-   // comment
-   if (_doComment) {
-      char ch;
-      while (file.get(ch)) _comment += ch;
-   }
-
-   // todo
+   
+   if (!_readInitial(file)) return false; // will get _type _M _I _L _O _A
+   
    file.close();
 
    // build connect
+   return false;
    cirMgr->_buildConnect();
+}
+
+bool CirMgr::_notSpace(char ch) {
+   if (isspace(ch)) {
+      if (ch == ' ') return parseError(EXTRA_SPACE);
+      errInt = int(ch);
+      return parseError(ILLEGAL_WSPACE);
+   }
    return true;
 }
 
+bool CirMgr::_beSpace(char ch) {
+   if (ch != ' ') return parseError(MISSING_SPACE);
+   return true;
+}
+
+bool CirMgr::_readNum(string& line, int& num, string err) {
+   string numStr = "";
+   if (!_notSpace(line[colNo])) return false;
+   for (unsigned s = colNo; s < line.size() && !isspace(line[s]); ++s) numStr += line[s];
+   if (numStr == "") { errMsg = "number of " + err; return parseError(MISSING_NUM); }
+   for (auto i : numStr) if (!isdigit(i)) {
+      errMsg = "number of " + err +"(" + numStr + ")";
+      return parseError(ILLEGAL_NUM);
+   }
+   num = stoi(numStr);
+   colNo += numStr.size();
+   return true;
+}
+
+bool CirMgr::_readInitial(fstream& file) {
+   string line = "";
+   getline(file, line);
+   if (line.size() == 0) { errMsg = "aag"; return parseError(MISSING_IDENTIFIER); }
+   colNo = 0;
+   if (!_notSpace(line[0])) return false;
+   // check _type
+   for (colNo = 0; isalpha(line[colNo]); ++colNo) _type += line[colNo];
+   if (_type != "aag") { errMsg = _type; return parseError(ILLEGAL_IDENTIFIER); }
+   // check ' M I L O A'
+   // read M
+   if (!_beSpace(line[colNo])) return false;
+   colNo += 1;
+   if (!_readNum(line, _M, "variables")) return false;
+   // read I
+   if (!_beSpace(line[colNo])) return false;
+   colNo += 1;
+   if (!_readNum(line, _I, "PIs")) return false;
+   // read L
+   if (!_beSpace(line[colNo])) return false;
+   colNo += 1;
+   if (!_readNum(line, _L, "latches")) return false;
+   // read O
+   if (!_beSpace(line[colNo])) return false;
+   colNo += 1;
+   if (!_readNum(line, _O, "POs")) return false;
+   // read A
+   if (!_beSpace(line[colNo])) return false;
+   colNo += 1;
+   if (!_readNum(line, _A, "AIGs")) return false;
+   if (colNo < line.size()) return parseError(MISSING_NEWLINE);
+
+   if (_M < _I + _L + _A) {
+      errMsg = "variables"; errInt = _M;
+      return parseError(NUM_TOO_SMALL);
+   }
+   if (_L != 0) {
+      cerr << "[Error] Line 1: Illegal latches!!" << endl;
+      return false;
+   }
+
+   ++lineNo;
+   return true;
+}
+
+bool 
+CirMgr::_readPI(int lit) {
+   // cout << "line: " << lineNo << ", Reading PI " << lit << endl;
+   CirPiGate* newPi = new CirPiGate(lit, lineNo);
+   _pilist.push_back(newPi);
+   _gatelist[newPi->getVar()] = newPi;
+}
+
+bool 
+CirMgr::_readPO(int lit, int var) {
+   // cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
+    CirPoGate* newPo = new CirPoGate(lit, var, lineNo);
+    _polist.push_back(newPo);
+    _gatelist[newPo->getVar()] = newPo;
+}
+
+bool 
+CirMgr::_readAIG(int lit, int src1, int src2) {
+   // cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
+   CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
+   _aiglist.push_back(newAig);
+   _gatelist[newAig->getVar()] = newAig;
+}
+
+bool 
+CirMgr::_readSymbI(int pos , const string& symb) {
+   // cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
+   _pilist[pos]->addSymbol(symb);
+}
+
+bool 
+CirMgr::_readSymbO(int pos, const string& symb) {
+   // cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
+   _polist[pos]->addSymbol(symb);
+}
 /**********************************************************/
 /*   class CirMgr member functions for circuit printing   */
 /**********************************************************/
@@ -323,41 +395,6 @@ CirMgr::writeAag(ostream& outfile) const
    outfile << "c\n" << myComment << endl;
 }
 
-bool 
-CirMgr::_readPI(int lit) {
-   // cout << "line: " << lineNo << ", Reading PI " << lit << endl;
-   CirPiGate* newPi = new CirPiGate(lit, lineNo);
-   _pilist.push_back(newPi);
-   _gatelist[newPi->getVar()] = newPi;
-}
-
-bool 
-CirMgr::_readPO(int lit, int var) {
-   // cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
-    CirPoGate* newPo = new CirPoGate(lit, var, lineNo);
-    _polist.push_back(newPo);
-    _gatelist[newPo->getVar()] = newPo;
-}
-
-bool 
-CirMgr::_readAIG(int lit, int src1, int src2) {
-   // cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
-   CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
-   _aiglist.push_back(newAig);
-   _gatelist[newAig->getVar()] = newAig;
-}
-
-bool 
-CirMgr::_readSymbI(int pos , const string& symb) {
-   // cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
-   _pilist[pos]->addSymbol(symb);
-}
-
-bool 
-CirMgr::_readSymbO(int pos, const string& symb) {
-   // cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
-   _polist[pos]->addSymbol(symb);
-}
 
 void
 CirMgr::_buildConnect() {
