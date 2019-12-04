@@ -92,12 +92,8 @@ CirGate::_dfsFanout(CirGate* g, unsigned spaces, bool inv, int level) {
  void 
  CirGate::connect(map<unsigned, CirGate*>& gatelist) {
     for (size_t i = 0;i < _fanin.size(); ++i) {
-      size_t inVar = *(size_t*)_fanin[i];
-      //  delete in;
-      // cout << _var << " is Connecting to " << inVar << endl;
+      size_t inVar = (size_t)(void*)_fanin[i];
        if (gatelist.find(inVar) == gatelist.end()) {
-          // floating
-         //  cout << "floating " << inVar << endl;
           CirGate* floatGate = new CirGate(inVar, 0, UNDEF_GATE);
           gatelist[inVar] = floatGate;
        }

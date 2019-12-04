@@ -113,7 +113,7 @@ public:
 
     _inv.push_back(srclit % 2 == 1 ? 1 : 0);
 
-    size_t* srcVar = new size_t(srclit / 2);
+    size_t srcVar = (size_t)(srclit / 2);
     _fanin.push_back((CirGate*)srcVar);
     _symbo = "";
   }
@@ -132,8 +132,8 @@ public:
     _inv.push_back(src1 % 2 == 1 ? 1 : 0);
     _inv.push_back(src2 % 2 == 1 ? 1 : 0);
 
-    size_t* var1 = new size_t(src1 / 2);
-    size_t* var2 = new size_t(src2 / 2);
+    size_t var1 = (size_t)(src1 / 2);
+    size_t var2 = (size_t)(src2 / 2);
     _fanin.push_back((CirGate*)var1);
     _fanin.push_back((CirGate*)var2);
     _symbo = "";
