@@ -59,9 +59,9 @@ public:
 private:
   // for parsing
   bool _readInitial(fstream&);
-  bool _readPI(int);
-  bool _readPO(int, int);
-  bool _readAIG(int, int, int);
+  bool _readPI(fstream&);
+  bool _readPO(fstream&);
+  bool _readAIG(fstream&);
   bool _readSymbI(int , const string&);
   bool _readSymbO(int, const string&);
 

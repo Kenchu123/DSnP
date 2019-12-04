@@ -60,6 +60,8 @@ static string errMsg;
 static int errInt;
 static CirGate *errGate;
 
+static CirParseError missError;
+
 static bool
 parseError(CirParseError err)
 {
@@ -111,12 +113,12 @@ parseError(CirParseError err)
               << " definition!!" << endl;
          break;
       case CANNOT_INVERTED:
-         cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
+         cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1 - to_string(errInt).size()
               << ": " << errMsg << " " << errInt << "(" << errInt/2
               << ") cannot be inverted!!" << endl;
          break;
       case MAX_LIT_ID:
-         cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
+         cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1 - to_string(errInt).size()
               << ": Literal \"" << errInt << "\" exceeds maximum valid ID!!"
               << endl;
          break;
@@ -157,7 +159,9 @@ CirMgr::readCircuit(const string& fileName)
    if (!file) { cerr << "Cannot open design \"" << fileName << "\"!!" << endl; return false; }
    
    if (!_readInitial(file)) return false; // will get _type _M _I _L _O _A
-   
+   if (!_readPI(file)) return false; // get PIs
+   if (!_readPO(file)) return false; // get POs
+   if (!_readAIG(file)) return false; // get AIGs
    file.close();
 
    // build connect
@@ -183,9 +187,9 @@ bool CirMgr::_readNum(string& line, int& num, string err) {
    string numStr = "";
    if (!_notSpace(line[colNo])) return false;
    for (unsigned s = colNo; s < line.size() && !isspace(line[s]); ++s) numStr += line[s];
-   if (numStr == "") { errMsg = "number of " + err; return parseError(MISSING_NUM); }
+   if (numStr == "") { errMsg = err; return parseError(missError); }
    for (auto i : numStr) if (!isdigit(i)) {
-      errMsg = "number of " + err +"(" + numStr + ")";
+      errMsg = err +"(" + numStr + ")";
       return parseError(ILLEGAL_NUM);
    }
    num = stoi(numStr);
@@ -204,29 +208,30 @@ bool CirMgr::_readInitial(fstream& file) {
    if (_type != "aag") { errMsg = _type; return parseError(ILLEGAL_IDENTIFIER); }
    // check ' M I L O A'
    // read M
+   missError = MISSING_NUM;
    if (!_beSpace(line[colNo])) return false;
    colNo += 1;
-   if (!_readNum(line, _M, "variables")) return false;
+   if (!_readNum(line, _M, "number of variables")) return false;
    // read I
    if (!_beSpace(line[colNo])) return false;
    colNo += 1;
-   if (!_readNum(line, _I, "PIs")) return false;
+   if (!_readNum(line, _I, "number of PIs")) return false;
    // read L
    if (!_beSpace(line[colNo])) return false;
    colNo += 1;
-   if (!_readNum(line, _L, "latches")) return false;
+   if (!_readNum(line, _L, "number of latches")) return false;
    // read O
    if (!_beSpace(line[colNo])) return false;
    colNo += 1;
-   if (!_readNum(line, _O, "POs")) return false;
+   if (!_readNum(line, _O, "number of POs")) return false;
    // read A
    if (!_beSpace(line[colNo])) return false;
    colNo += 1;
-   if (!_readNum(line, _A, "AIGs")) return false;
+   if (!_readNum(line, _A, "number of AIGs")) return false;
    if (colNo < line.size()) return parseError(MISSING_NEWLINE);
 
    if (_M < _I + _L + _A) {
-      errMsg = "variables"; errInt = _M;
+      errMsg = "Number of variables"; errInt = _M;
       return parseError(NUM_TOO_SMALL);
    }
    if (_L != 0) {
@@ -235,31 +240,120 @@ bool CirMgr::_readInitial(fstream& file) {
    }
 
    ++lineNo;
+   colNo = 0;
    return true;
 }
 
 bool 
-CirMgr::_readPI(int lit) {
+CirMgr::_readPI(fstream& file) {
    // cout << "line: " << lineNo << ", Reading PI " << lit << endl;
-   CirPiGate* newPi = new CirPiGate(lit, lineNo);
-   _pilist.push_back(newPi);
-   _gatelist[newPi->getVar()] = newPi;
+   int repeat = _I;
+   missError = MISSING_DEF;
+   while (repeat--) {
+      int lit;
+      string line;
+      if (!getline(file, line)) { errMsg = "PI"; return parseError(MISSING_DEF); }
+      // cout << "PI str: " << line << endl;
+      if (!_readNum(line, lit, "PI")) return false;
+      if (colNo < line.size()) return parseError(MISSING_NEWLINE);
+      errInt = lit;
+      if (lit / 2 == 0) return parseError(REDEF_CONST);
+      if (lit % 2) {
+         errMsg = "PI";
+         return parseError(CANNOT_INVERTED);
+      }
+      if (lit / 2 > _M) return parseError(MAX_LIT_ID);
+
+      CirPiGate* newPi = new CirPiGate(lit, lineNo);
+      for (auto g : _pilist) if (g->getVar() == lit / 2) {
+         errGate = newPi;
+         return parseError(REDEF_GATE);
+      }
+      _pilist.push_back(newPi);
+      _gatelist[newPi->getVar()] = newPi;
+      ++lineNo;
+      colNo = 0;
+   }
+
+   return true;
 }
 
 bool 
-CirMgr::_readPO(int lit, int var) {
+CirMgr::_readPO(fstream& file) {
    // cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
-    CirPoGate* newPo = new CirPoGate(lit, var, lineNo);
-    _polist.push_back(newPo);
-    _gatelist[newPo->getVar()] = newPo;
+   missError = MISSING_DEF;
+   for (int re = 0; re < _O; ++re) {
+      int lit;
+      string line;
+      if (!getline(file, line)) { errMsg = "PO"; return parseError(MISSING_DEF); }
+      // cout << "PO str: " << line << endl;
+      if (!_readNum(line, lit, "PO")) return false;
+      if (colNo < line.size()) return parseError(MISSING_NEWLINE);
+      errInt = lit;
+      if (lit / 2 > _M) return parseError(MAX_LIT_ID);
+
+      CirPoGate* newPo = new CirPoGate(lit, re + _M, lineNo);
+      for (auto g : _polist) if (g->getVar() == lit / 2) {
+         errGate = newPo;
+         return parseError(REDEF_GATE);
+      }
+      _polist.push_back(newPo);
+      _gatelist[newPo->getVar()] = newPo;
+      ++lineNo;
+      colNo = 0;
+   }
+
+   return true;
+   
 }
 
 bool 
-CirMgr::_readAIG(int lit, int src1, int src2) {
+CirMgr::_readAIG(fstream& file) {
    // cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
-   CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
-   _aiglist.push_back(newAig);
-   _gatelist[newAig->getVar()] = newAig;
+   int repeat = _A;
+   missError = MISSING_DEF;
+   while (repeat--) {
+      int lit, src1, src2;
+      string line;
+      if (!getline(file, line)) { errMsg = "AIG"; return parseError(MISSING_DEF); }
+      // cout << "AIG str: " << line << endl;
+      // read AIG lit
+      if (!_readNum(line, lit, "AIG")) return false;
+      errInt = lit;
+      if (lit / 2 == 0) return parseError(REDEF_CONST);
+      if (lit % 2) {
+         errMsg = "AIG";
+         return parseError(CANNOT_INVERTED);
+      }
+      if (lit / 2 > _M) return parseError(MAX_LIT_ID);
+
+      // read AIG src1
+      if (!_beSpace(line[colNo])) return false;
+      colNo += 1;
+      if (!_readNum(line, src1, "AIG")) return false;
+      if (src1 / 2 > _M) { errInt = src1; return parseError(MAX_LIT_ID); }
+      // read AIG src2
+      if (!_beSpace(line[colNo])) return false;
+      colNo += 1;
+      if (!_readNum(line, src2, "AIG")) return false;
+      if (src2 / 2 > _M) { errInt = src2; return parseError(MAX_LIT_ID); }
+      if (colNo < line.size()) return parseError(MISSING_NEWLINE);
+
+      CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
+      for (auto g : _aiglist) if (g->getVar() == lit / 2) {
+         errGate = newAig;
+         return parseError(REDEF_GATE);
+      }
+      for (auto g : _pilist) if (g->getVar() == lit / 2) {
+         errGate = newAig;
+         return parseError(REDEF_GATE);
+      }
+      _aiglist.push_back(newAig);
+      _gatelist[newAig->getVar()] = newAig;
+      ++lineNo;
+      colNo = 0;
+   }
+   
 }
 
 bool 
