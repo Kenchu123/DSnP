@@ -1,12 +1,137 @@
-cirr tests.fraig/test2.aag
+cirr cirp-n.aag -replace
 cirp
-cirp -pi
-cirp -po
-cirp -sum
-cirp -fl
-cirp -n
+cirp -net
+cirp -float
+cirp -PI
+cirp -PO
+cirg 0
+cirg 1
+cirg 2
+cirg 6
+cirg 7
+cirg 10
+cirg 11
+cirg 15
+cirg 16
+cirg 19
+cirg 22
+cirg 23
+cirg 24
+cirg 25
+cirg 0 -fanin 7
+cirg 1 -fanin 7
+cirg 2 -fanin 7
+cirg 6 -fanin 7
+cirg 7 -fanin 7
+cirg 10 -fanin 7
+cirg 11 -fanin 7
+cirg 15 -fanin 7
+cirg 16 -fanin 7
+cirg 19 -fanin 7
+cirg 22 -fanin 7
+cirg 23 -fanin 7
+cirg 24 -fanin 7
+cirg 25 -fanin 7
+cirg 0 -fanout 7
+cirg 1 -fanout 7
+cirg 2 -fanout 7
+cirg 6 -fanout 7
+cirg 7 -fanout 7
+cirg 10 -fanout 7
+cirg 11 -fanout 7
+cirg 15 -fanout 7
+cirg 16 -fanout 7
+cirg 19 -fanout 7
+cirg 22 -fanout 7
+cirg 23 -fanout 7
+cirg 24 -fanout 7
+cirg 25 -fanout 7
+cirw -o mine_fraig.aag
+cirr opt06.aag -replace
+cirp
+cirp -net
+cirp -float
+cirp -PI
+cirp -PO
+cirg 0
+cirg 1
+cirg 2
+cirg 3
+cirg 4
+cirg 5
+cirg 6
+cirg 7
+cirg 8
+cirg 9
+cirg 10
+cirg 11
 cirg 12
-cirg 17 -fanin 14
-cirg 1 -fanout 4
+cirg 13
+cirg 14
+cirg 0 -fanin 7
+cirg 1 -fanin 7
+cirg 2 -fanin 7
+cirg 3 -fanin 7
+cirg 4 -fanin 7
+cirg 5 -fanin 7
+cirg 6 -fanin 7
+cirg 7 -fanin 7
+cirg 8 -fanin 7
+cirg 9 -fanin 7
+cirg 10 -fanin 7
+cirg 11 -fanin 7
+cirg 12 -fanin 7
+cirg 13 -fanin 7
+cirg 14 -fanin 7
+cirg 15 -fanin 7
+cirg 0 -fanout 7
+cirg 1 -fanout 7
+cirg 2 -fanout 7
+cirg 3 -fanout 7
+cirg 4 -fanout 7
+cirg 5 -fanout 7
+cirg 6 -fanout 7
+cirg 7 -fanout 7
+cirg 8 -fanout 7
+cirg 9 -fanout 7
+cirg 10 -fanout 7
+cirg 11 -fanout 7
+cirg 12 -fanout 7
+cirg 13 -fanout 7
+cirg 15 -fanout 7
+cirg 14 -fanout 7
+cirw -o mine_fraig.aag
+cirr sim09.aag -replace
+cirp
+cirp -ne
+cirp -float
+cirg 2209 -fanout 8
+cirg 933 -fanin 8
+cirg 1145 -fanout 8
+cirg 1145 -fanin 8
+cirr strash05.aag -replace
+cirp
+cirp -ne
+cirp -float
+cirg 0 -fanin 7
+cirg 1 -fanin 7
+cirg 2 -fanin 7
+cirg 3 -fanin 7
+cirg 4 -fanin 7
+cirg 5 -fanin 7
+cirg 6 -fanin 7
+cirg 7 -fanin 7
+cirg 8 -fanin 7
+cirg 9 -fanin 7
+cirg 0 -fanout 7
+cirg 1 -fanout 7
+cirg 2 -fanout 7
+cirg 3 -fanout 7
+cirg 4 -fanout 7
+cirg 5 -fanout 7
+cirg 6 -fanout 7
+cirg 7 -fanout 7
+cirg 8 -fanout 7
+cirg 9 -fanout 7
+cirw -o mine_fraig.aag
 q -f
-

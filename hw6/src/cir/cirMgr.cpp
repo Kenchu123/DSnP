@@ -133,7 +133,7 @@ parseError(CirParseError err)
               << errMsg << errInt << "\" is redefined!!" << endl;
          break;
       case REDEF_CONST:
-         cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1
+         cerr << "[ERROR] Line " << lineNo+1 << ", Col " << colNo+1 - 1
               << ": Cannot redefine constant (" << errInt << ")!!" << endl;
          break;
       case NUM_TOO_SMALL:
@@ -162,18 +162,25 @@ CirMgr::readCircuit(const string& fileName)
    if (!_readPI(file)) return false; // get PIs
    if (!_readPO(file)) return false; // get POs
    if (!_readAIG(file)) return false; // get AIGs
+   if (!_readSymb(file)) return false; // read symb
+   if (_doComment) {
+      char ch;
+      while (file.get(ch)) _comment += ch;
+   }
    file.close();
 
    // build connect
-   return false;
    cirMgr->_buildConnect();
+   return true;
 }
 
 bool CirMgr::_notSpace(char ch) {
    if (isspace(ch)) {
       if (ch == ' ') return parseError(EXTRA_SPACE);
-      errInt = int(ch);
-      return parseError(ILLEGAL_WSPACE);
+      else { 
+         errInt = int(ch);
+         return parseError(ILLEGAL_WSPACE);
+      }
    }
    return true;
 }
@@ -235,7 +242,7 @@ bool CirMgr::_readInitial(fstream& file) {
       return parseError(NUM_TOO_SMALL);
    }
    if (_L != 0) {
-      cerr << "[Error] Line 1: Illegal latches!!" << endl;
+      cerr << "[ERROR] Line 1: Illegal latches!!" << endl;
       return false;
    }
 
@@ -264,9 +271,9 @@ CirMgr::_readPI(fstream& file) {
       }
       if (lit / 2 > _M) return parseError(MAX_LIT_ID);
 
-      CirPiGate* newPi = new CirPiGate(lit, lineNo);
+      CirPiGate* newPi = new CirPiGate(lit, lineNo + 1);
       for (auto g : _pilist) if (g->getVar() == lit / 2) {
-         errGate = newPi;
+         errGate = g;
          return parseError(REDEF_GATE);
       }
       _pilist.push_back(newPi);
@@ -282,7 +289,7 @@ bool
 CirMgr::_readPO(fstream& file) {
    // cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
    missError = MISSING_DEF;
-   for (int re = 0; re < _O; ++re) {
+   for (int re = 1; re <= _O; ++re) {
       int lit;
       string line;
       if (!getline(file, line)) { errMsg = "PO"; return parseError(MISSING_DEF); }
@@ -292,9 +299,9 @@ CirMgr::_readPO(fstream& file) {
       errInt = lit;
       if (lit / 2 > _M) return parseError(MAX_LIT_ID);
 
-      CirPoGate* newPo = new CirPoGate(lit, re + _M, lineNo);
+      CirPoGate* newPo = new CirPoGate(lit, re + _M, lineNo + 1);
       for (auto g : _polist) if (g->getVar() == lit / 2) {
-         errGate = newPo;
+         errGate = g;
          return parseError(REDEF_GATE);
       }
       _polist.push_back(newPo);
@@ -304,7 +311,6 @@ CirMgr::_readPO(fstream& file) {
    }
 
    return true;
-   
 }
 
 bool 
@@ -339,13 +345,13 @@ CirMgr::_readAIG(fstream& file) {
       if (src2 / 2 > _M) { errInt = src2; return parseError(MAX_LIT_ID); }
       if (colNo < line.size()) return parseError(MISSING_NEWLINE);
 
-      CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo);
+      CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo + 1);
       for (auto g : _aiglist) if (g->getVar() == lit / 2) {
-         errGate = newAig;
+         errGate = g;
          return parseError(REDEF_GATE);
       }
       for (auto g : _pilist) if (g->getVar() == lit / 2) {
-         errGate = newAig;
+         errGate = g;
          return parseError(REDEF_GATE);
       }
       _aiglist.push_back(newAig);
@@ -353,19 +359,78 @@ CirMgr::_readAIG(fstream& file) {
       ++lineNo;
       colNo = 0;
    }
-   
+
+   return true;
 }
 
-bool 
-CirMgr::_readSymbI(int pos , const string& symb) {
-   // cout << "line: " << lineNo << ", Reading Symbo pi " << pos << " " << symb << endl;
-   _pilist[pos]->addSymbol(symb);
-}
+bool CirMgr::_readSymb(fstream& file) {
+   string line;
+   while (getline(file, line)) {
+      char type; int pos; string symb;
 
-bool 
-CirMgr::_readSymbO(int pos, const string& symb) {
-   // cout << "line: " << lineNo << ", Reading Symbo po " << pos << " " << symb << endl;
-   _polist[pos]->addSymbol(symb);
+      if (line.size() == 0) break;
+      if (!_notSpace(line[0])) { return false; }
+      type = line[0];
+      if (type == 'c') break;
+      if (type != 'i' && type != 'l' && type != 'o') {
+         errMsg = type; return parseError(ILLEGAL_SYMBOL_TYPE);
+      }
+      colNo += 1;
+
+      if (!_readNum(line, pos, "symbol index")) return false;
+      if (colNo == line.size()) {
+         errMsg = "symbolic name";
+         return parseError(MISSING_IDENTIFIER);
+      }
+      
+      if (!_beSpace(line[colNo])) { return false; }
+      colNo += 1;
+      symb = line.substr(colNo);
+      if (symb.size() == 0) {
+         errMsg = "symbolic name";
+         return parseError(MISSING_IDENTIFIER);
+      }
+      for (size_t i = 0; i < symb.size(); ++i) if (!isprint(symb[i])) {
+         errInt = int(symb[i]);
+         colNo += i;
+         return parseError(ILLEGAL_SYMBOL_NAME);
+      }
+      switch (type) {
+         case 'i':
+            if (pos >= _pilist.size()) {
+               errMsg = "PI index"; errInt = pos;
+               return parseError(NUM_TOO_BIG);
+            }
+            if (_pilist[pos]->_symbo.size()) {
+               errMsg = 'i'; errInt = pos;
+               return parseError(REDEF_SYMBOLIC_NAME);
+            }
+            _pilist[pos]->addSymbol(symb);
+            break;
+         case 'o':
+            if (pos >= _polist.size()) {
+               errMsg = "PO index"; errInt = pos;
+               return parseError(NUM_TOO_BIG);
+            }
+            if (_polist[pos]->_symbo.size()) {
+               errMsg = 'o'; errInt = pos;
+               return parseError(REDEF_SYMBOLIC_NAME);
+            }
+            _polist[pos]->addSymbol(symb);
+            break;
+         default:
+            return false;
+      }
+      ++lineNo;
+      colNo = 0;
+   }
+   // get "c" or nothing
+   if (line.size()) {
+       colNo += 1;
+       if (colNo != line.size()) return parseError(MISSING_NEWLINE);
+       _doComment = true;
+   }
+   return true;
 }
 /**********************************************************/
 /*   class CirMgr member functions for circuit printing   */
@@ -482,8 +547,14 @@ CirMgr::writeAag(ostream& outfile) const
          outfile << endl;
       }
    }
-   for (size_t i = 0;i < ilos.size(); ++i) {
-      outfile << ilos[i] << " " << symbols[i] << endl;
+   // for (size_t i = 0;i < ilos.size(); ++i) {
+   //    outfile << ilos[i] << " " << symbols[i] << endl;
+   // }
+   for (size_t i = 0;i < _pilist.size(); ++i) {
+      if (_pilist[i]->_symbo.size()) outfile << "i" << i << " " << _pilist[i]->_symbo << endl;
+   }
+   for (size_t i = 0;i < _polist.size(); ++i) {
+      if (_polist[i]->_symbo.size()) outfile << "o" << i << " " << _polist[i]->_symbo << endl;
    }
    string myComment = "AAG output by Che-Kuang (Ken) Chu";
    outfile << "c\n" << myComment << endl;
@@ -529,7 +600,6 @@ CirMgr::reset() {
    CirMgr::Const0 = new CirGate(0, 0, CONST_GATE);
 
    _M = _I = _L = _O = _A = 0;
-   ilos.clear(); symbols.clear();
    _doComment = 0;
    _comment = _type = "";
 

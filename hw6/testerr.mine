@@ -38,7 +38,7 @@ cir> cirr err13.aag
 [ERROR] Line 1: Number of variables is too small (3)!!
 
 cir> cirr err14.aag
-[Error] Line 1: Illegal latches!!
+[ERROR] Line 1: Illegal latches!!
 
 cir> cirr err15.aag
 [ERROR] Line 2: Missing PI definition!!
@@ -65,7 +65,7 @@ cir> cirr err22.aag
 [ERROR] Line 3: Missing PI definition!!
 
 cir> cirr err23.aag
-[ERROR] Line 3, Col 2: Cannot redefine constant (1)!!
+[ERROR] Line 3, Col 1: Cannot redefine constant (1)!!
 
 cir> cirr err24.aag
 [ERROR] Line 3, Col 1: Literal "16" exceeds maximum valid ID!!
@@ -83,133 +83,88 @@ cir> cirr err28.aag
 [ERROR] Line 5, Col 1: Literal "17" exceeds maximum valid ID!!
 
 cir> cirr err29.aag
-AIG str: 6
 [ERROR] Line 6, Col 2: Missing space character!!
 
 cir> cirr err30.aag
-AIG str: 4 13 15
-[ERROR] Line 6: Literal "4" is redefined, previously defined as AIG in line 5!!
+[ERROR] Line 6: Literal "4" is redefined, previously defined as PI in line 3!!
 
 cir> cirr err31.aag
-AIG str:  6 13 15
 [ERROR] Line 6, Col 1: Extra space character is detected!!
 
 cir> cirr err32.aag
-AIG str: 6 13  15
 [ERROR] Line 6, Col 6: Extra space character is detected!!
 
 cir> cirr err33.aag
-AIG str: 6 13 15 
 [ERROR] Line 6, Col 8: A new line is expected here!!
 
 cir> cirr err34.aag
-AIG str: 1 13 15
-[ERROR] Line 6, Col 2: Cannot redefine constant (1)!!
+[ERROR] Line 6, Col 1: Cannot redefine constant (1)!!
 
 cir> cirr err35.aag
-AIG str: 20 13 15 
 [ERROR] Line 6, Col 1: Literal "20" exceeds maximum valid ID!!
 
 cir> cirr err36.aag
-AIG str: 6 21 15 
 [ERROR] Line 6, Col 3: Literal "21" exceeds maximum valid ID!!
 
 cir> cirr err37.aag
-AIG str: 6 13 15 4
 [ERROR] Line 6, Col 8: A new line is expected here!!
 
 cir> cirr err38.aag
-AIG str: 6 13 15
-AIG str: 6 2 4
 [ERROR] Line 7: Literal "6" is redefined, previously defined as AIG in line 6!!
 
 cir> cirr err39.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
 [ERROR] Line 8: Missing AIG definition!!
 
 cir> cirr err40.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 1: Extra space character is detected!!
 
 cir> cirr err41.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 1: Illegal white space char(9) is detected!!
 
 cir> cirr err42.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 2: Extra space character is detected!!
 
 cir> cirr err43.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 2: Illegal white space char(9) is detected!!
 
 cir> cirr err44.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9: Illegal symbol index(a)!!
 
 cir> cirr err45.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9: Missing "symbolic name"!!
 
 cir> cirr err46.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9: Missing "symbolic name"!!
 
 cir> cirr err47.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 3: Missing space character!!
 
 cir> cirr err48.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 5: Symbolic name contains un-printable char(27)!!
 
 cir> cirr err49.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9: Missing symbol index definition!!
 
 cir> cirr err50.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9, Col 1: Illegal symbol type (a)!!
 
 cir> cirr err51.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 10, Col 1: Illegal symbol type (a)!!
 
 cir> cirr err52.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 9: PI index is too big (3)!!
 
 cir> cirr err53.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 10: Symbolic name for "i0" is redefined!!
 
 cir> cirr err54.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 10, Col 1: Extra space character is detected!!
 
 cir> cirr err55.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 2 4
+[ERROR] Line 10, Col 1: Illegal white space char(9) is detected!!
 
 cir> cirr err56.aag
-[ERROR] Line 2, Col 2: Cannot redefine constant (0)!!
+[ERROR] Line 2, Col 1: Cannot redefine constant (0)!!
 
 cir> cirr err57.aag
 [ERROR] Line 1: Number of variables is too small (2)!!
@@ -224,25 +179,25 @@ cir> cirr err60.aag
 [ERROR] Line 1: Missing "aag"!!
 
 cir> cirr err61.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 3 5
+[ERROR] Line 13, Col 2: A new line is expected here!!
 
 cir> cirr err62.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 3 5
+[ERROR] Line 13, Col 2: A new line is expected here!!
 
 cir> cirr err63.aag
 Cannot open design "err63.aag"!!
 
 cir> cirr good.aag
-AIG str: 6 13 15
-AIG str: 12 2 4
-AIG str: 14 3 5
 
 cir> cirp
-Error: circuit is not yet constructed!!
+
+Circuit Statistics
+==================
+  PI           2
+  PO           2
+  AIG          3
+------------------
+  Total        7
 
 cir> q -f
 

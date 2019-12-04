@@ -62,8 +62,9 @@ private:
   bool _readPI(fstream&);
   bool _readPO(fstream&);
   bool _readAIG(fstream&);
-  bool _readSymbI(int , const string&);
-  bool _readSymbO(int, const string&);
+  // bool _readSymbI(int , const string&);
+  // bool _readSymbO(int, const string&);
+  bool _readSymb(fstream&);
 
   bool _notSpace(char);
   bool _beSpace(char);
@@ -77,8 +78,6 @@ private:
   bool _doComment;
   string _comment;
   string _type;
-  vector <string> ilos;
-  vector <string> symbols;
 
   int _M, _I, _L, _O, _A;
   vector<CirPiGate*> _pilist;
