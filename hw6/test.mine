@@ -1,10 +1,4 @@
 cir> cirr cirp-n.aag -replace
-line: 7
-line: 7
-line: 7
-line: 7
-line: 11
-line: 11
 
 cir> cirp
 
@@ -283,10 +277,8 @@ cir> cirg 25 -fanout 7
 PO 25
 
 cir> cirw -o mine_fraig.aag
-6
 
 cir> cirr opt06.aag -replace
-line: 1
 
 cir> cirp
 
@@ -597,20 +589,20 @@ PO 15
 
 cir> cirg 0 -fanout 7
 CONST 0
-  AIG 5
-    !AIG 6
-      AIG 10
-        !AIG 13
-          !AIG 14
-            PO 15
-      AIG 11
-        AIG 14 (*)
-      AIG 12
-        AIG 13 (*)
-  !AIG 4
-    AIG 5 (*)
   AIG 3
-    AIG 4 (*)
+    AIG 4
+      AIG 5
+        !AIG 6
+          AIG 10
+            !AIG 13
+              !AIG 14
+          AIG 11
+            AIG 14
+              PO 15
+          AIG 12
+            AIG 13 (*)
+  !AIG 4 (*)
+  AIG 5 (*)
 
 cir> cirg 1 -fanout 7
 PI 1
@@ -622,38 +614,39 @@ PI 1
             !AIG 13
               !AIG 14
           AIG 11
-            AIG 14 (*)
+            AIG 14
+              PO 15
           AIG 12
             AIG 13 (*)
   AIG 7
-    AIG 10 (*)
     !AIG 8
-      AIG 11 (*)
       AIG 6 (*)
+      AIG 11 (*)
     !AIG 8 (*)
     AIG 9
       AIG 12 (*)
     AIG 9 (*)
+    AIG 10 (*)
 
 cir> cirg 2 -fanout 7
 PI 2
   !AIG 7
-    AIG 10
-      !AIG 13
-        !AIG 14
-          PO 15
     !AIG 8
-      AIG 11
-        AIG 14 (*)
       AIG 6
-        AIG 10 (*)
-        AIG 11 (*)
+        AIG 10
+          !AIG 13
+            !AIG 14
+              PO 15
+        AIG 11
+          AIG 14 (*)
         AIG 12
           AIG 13 (*)
+      AIG 11 (*)
     !AIG 8 (*)
     AIG 9
       AIG 12 (*)
     AIG 9 (*)
+    AIG 10 (*)
 
 cir> cirg 3 -fanout 7
 AIG 3
@@ -707,35 +700,35 @@ AIG 6
 
 cir> cirg 7 -fanout 7
 AIG 7
-  AIG 10
-    !AIG 13
-      !AIG 14
-        PO 15
   !AIG 8
-    AIG 11
-      AIG 14 (*)
     AIG 6
-      AIG 10 (*)
-      AIG 11 (*)
+      AIG 10
+        !AIG 13
+          !AIG 14
+            PO 15
+      AIG 11
+        AIG 14 (*)
       AIG 12
         AIG 13 (*)
+    AIG 11 (*)
   !AIG 8 (*)
   AIG 9
     AIG 12 (*)
   AIG 9 (*)
+  AIG 10 (*)
 
 cir> cirg 8 -fanout 7
 AIG 8
-  AIG 11
-    AIG 14
-      PO 15
   AIG 6
     AIG 10
       !AIG 13
-        !AIG 14 (*)
-    AIG 11 (*)
+        !AIG 14
+          PO 15
+    AIG 11
+      AIG 14 (*)
     AIG 12
       AIG 13 (*)
+  AIG 11 (*)
 
 cir> cirg 9 -fanout 7
 AIG 9
@@ -774,10 +767,8 @@ AIG 14
   PO 15
 
 cir> cirw -o mine_fraig.aag
-12
 
 cir> cirr sim09.aag -replace
-line: 1
 
 cir> cirp
 
@@ -4386,16 +4377,9 @@ PI 2209
   AIG 2210
     AIG 2211
       !AIG 2213
-        !AIG 2405
-          AIG 2406
-            !AIG 2415
-              AIG 2416
-                AIG 2417
-        !AIG 2459
-          AIG 2460
-            !AIG 2467
-              AIG 2468
-                AIG 2469
+        AIG 2214
+          !PO 3559
+        AIG 2214 (*)
         !AIG 2332
           AIG 2333
             !AIG 2342
@@ -4406,9 +4390,16 @@ PI 2209
             !AIG 2377
               AIG 2378
                 AIG 2379
-        AIG 2214
-          !PO 3559
-        AIG 2214 (*)
+        !AIG 2405
+          AIG 2406
+            !AIG 2415
+              AIG 2416
+                AIG 2417
+        !AIG 2459
+          AIG 2460
+            !AIG 2467
+              AIG 2468
+                AIG 2469
 
 cir> cirg 933 -fanin 8
 AIG 933
@@ -4479,7 +4470,6 @@ AIG 1145
         AIG 862 (*)
 
 cir> cirr strash05.aag -replace
-line: 1
 
 cir> cirp
 
@@ -4606,7 +4596,6 @@ cir> cirg 9 -fanout 7
 PO 9
 
 cir> cirw -o mine_fraig.aag
-4
 
 cir> q -f
-cir> 
+

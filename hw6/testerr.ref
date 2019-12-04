@@ -139,52 +139,52 @@ cir> cirr err46.aag
 cir> cirr err47.aag
 [ERROR] Line 9, Col 3: Missing space character!!
 
-cir> cirr err48.aag
+cir> cirr err48.aag -r
 [ERROR] Line 9, Col 5: Symbolic name contains un-printable char(27)!!
 
-cir> cirr err49.aag
-[ERROR] Line 9, Col 2: Missing symbol index!!
+cir> cirr err49.aag -r
 
-cir> cirr err50.aag
+cir> cirr err50.aag -r
+Note: original circuit is replaced...
 [ERROR] Line 9, Col 1: Illegal symbol type (a)!!
 
-cir> cirr err51.aag
+cir> cirr err51.aag -r
 [ERROR] Line 10, Col 1: Illegal symbol type (a)!!
 
-cir> cirr err52.aag
+cir> cirr err52.aag -r
 [ERROR] Line 9: PI index is too big (3)!!
 
-cir> cirr err53.aag
+cir> cirr err53.aag -r
 [ERROR] Line 10: Symbolic name for "i0" is redefined!!
 
-cir> cirr err54.aag
+cir> cirr err54.aag -r
 [ERROR] Line 10, Col 1: Extra space character is detected!!
 
-cir> cirr err55.aag
+cir> cirr err55.aag -r
 [ERROR] Line 10, Col 1: Illegal white space char(9) is detected!!
 
-cir> cirr err56.aag
+cir> cirr err56.aag -r
 [ERROR] Line 2, Col 1: Cannot redefine constant (0)!!
 
-cir> cirr err57.aag
+cir> cirr err57.aag -r
 [ERROR] Line 1: Number of variables is too small (2)!!
 
-cir> cirr err58.aag
+cir> cirr err58.aag -r
 [ERROR] Line 1, Col 4: Missing number of variables!!
 
-cir> cirr err59.aag
+cir> cirr err59.aag -r
 [ERROR] Line 1: Illegal number of AIGs(a2)!!
 
-cir> cirr err60.aag
+cir> cirr err60.aag -r
 [ERROR] Line 1: Missing "aag"!!
 
-cir> cirr err61.aag
+cir> cirr err61.aag -r
 [ERROR] Line 13, Col 2: A new line is expected here!!
 
-cir> cirr err62.aag
+cir> cirr err62.aag -r
 [ERROR] Line 13, Col 2: A new line is expected here!!
 
-cir> cirr err63.aag
+cir> cirr err63.aag -r
 Cannot open design "err63.aag"!!
 
 cir> cirr good.aag

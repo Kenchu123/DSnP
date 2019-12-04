@@ -253,14 +253,12 @@ bool CirMgr::_readInitial(fstream& file) {
 
 bool 
 CirMgr::_readPI(fstream& file) {
-   // cout << "line: " << lineNo << ", Reading PI " << lit << endl;
    int repeat = _I;
    missError = MISSING_DEF;
    while (repeat--) {
       int lit;
       string line;
       if (!getline(file, line)) { errMsg = "PI"; return parseError(MISSING_DEF); }
-      // cout << "PI str: " << line << endl;
       if (!_readNum(line, lit, "PI")) return false;
       if (colNo < line.size()) return parseError(MISSING_NEWLINE);
       errInt = lit;
@@ -287,13 +285,11 @@ CirMgr::_readPI(fstream& file) {
 
 bool 
 CirMgr::_readPO(fstream& file) {
-   // cout << "line: " << lineNo << ", Reading PO " << lit << " " << var << endl;
    missError = MISSING_DEF;
    for (int re = 1; re <= _O; ++re) {
       int lit;
       string line;
       if (!getline(file, line)) { errMsg = "PO"; return parseError(MISSING_DEF); }
-      // cout << "PO str: " << line << endl;
       if (!_readNum(line, lit, "PO")) return false;
       if (colNo < line.size()) return parseError(MISSING_NEWLINE);
       errInt = lit;
@@ -315,14 +311,12 @@ CirMgr::_readPO(fstream& file) {
 
 bool 
 CirMgr::_readAIG(fstream& file) {
-   // cout << "line: " << lineNo << ", Reading AIG " << lit << " " << src1 << " " << src2 << endl;
    int repeat = _A;
    missError = MISSING_DEF;
    while (repeat--) {
       int lit, src1, src2;
       string line;
       if (!getline(file, line)) { errMsg = "AIG"; return parseError(MISSING_DEF); }
-      // cout << "AIG str: " << line << endl;
       // read AIG lit
       if (!_readNum(line, lit, "AIG")) return false;
       errInt = lit;
@@ -364,11 +358,9 @@ CirMgr::_readAIG(fstream& file) {
 }
 
 bool CirMgr::_readSymb(fstream& file) {
-   string line;
+   string line = "";
    while (getline(file, line)) {
       char type; int pos; string symb;
-
-      if (line.size() == 0) break;
       if (!_notSpace(line[0])) { return false; }
       type = line[0];
       if (type == 'c') break;
@@ -532,7 +524,7 @@ CirMgr::writeAag(ostream& outfile) const
    // count AIG in _dfslist
    int validA = 0;
    for (auto i : _dfslist) if (i->_gateType == AIG_GATE) ++validA;
-   cout << validA << endl;
+   outfile << validA << endl;
 
    for (auto i : _pilist) outfile << i->_var * 2 << endl;
    for (auto i : _polist) {
@@ -547,9 +539,6 @@ CirMgr::writeAag(ostream& outfile) const
          outfile << endl;
       }
    }
-   // for (size_t i = 0;i < ilos.size(); ++i) {
-   //    outfile << ilos[i] << " " << symbols[i] << endl;
-   // }
    for (size_t i = 0;i < _pilist.size(); ++i) {
       if (_pilist[i]->_symbo.size()) outfile << "i" << i << " " << _pilist[i]->_symbo << endl;
    }
@@ -564,8 +553,9 @@ CirMgr::writeAag(ostream& outfile) const
 void
 CirMgr::_buildConnect() {
    _gatelist[0] = Const0;
-   for (auto gate : _polist) gate->connect(_gatelist);
-   for (auto gate : _aiglist) gate->connect(_gatelist);
+   for (map<unsigned, CirGate*>::iterator it = _gatelist.begin(); it != _gatelist.end(); ++it) {
+      if (it->second->_gateType == PO_GATE || it->second->_gateType == AIG_GATE) it->second->connect(_gatelist);
+   }
    genDFSList();
 }
 
@@ -577,7 +567,6 @@ CirMgr::genDFSList() {
 
 void
 CirMgr::_dfs(CirGate* gate) {
-   // cout << "DFS Gate: " << gate->_var << endl;
    gate->setToGlobalRef();
    for (size_t i = 0;i < gate->_fanin.size(); ++i) {
       if (!gate->_fanin[i]->isGlobalRef()) {

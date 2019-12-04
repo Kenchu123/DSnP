@@ -47,8 +47,6 @@ CirGate::reportFanin(int level)
 
 void
 CirGate::_dfsFanin(CirGate* g, unsigned spaces, bool inv, int level) {
-   if (level < 0) return;
-
    for (size_t i = 0; i < spaces; ++i) cout << " ";
    if (inv) cout << "!";
    cout << g->getTypeStr() << " " << g->_var;
@@ -58,6 +56,7 @@ CirGate::_dfsFanin(CirGate* g, unsigned spaces, bool inv, int level) {
    }
    else cout << endl;
    // dfs next level
+   if (level == 0) return;
    g->setToGlobalRef();
    for (size_t i = 0; i < g->_fanin.size(); ++i) {
       _dfsFanin(g->_fanin[i], spaces + 2, g->_inv[i], level - 1);
@@ -74,7 +73,6 @@ CirGate::reportFanout(int level)
 
 void
 CirGate::_dfsFanout(CirGate* g, unsigned spaces, bool inv, int level) {
-   if (level < 0) return;
    for (size_t i = 0; i < spaces; ++i) cout << " ";
    if (inv) cout << "!";
    cout << g->getTypeStr() << " " << g->_var;
@@ -84,6 +82,7 @@ CirGate::_dfsFanout(CirGate* g, unsigned spaces, bool inv, int level) {
    }
    else cout << endl;
    // dfs next level
+   if (level == 0) return;
    g->setToGlobalRef();
    for (size_t i = 0; i < g->_fanout.size(); ++i) {
       _dfsFanout(g->_fanout[i], spaces + 2, g->_outv[i], level - 1);
