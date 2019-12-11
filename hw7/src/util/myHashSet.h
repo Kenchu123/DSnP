@@ -48,10 +48,50 @@ public:
       friend class HashSet<Data>;
 
    public:
-      const Data& operator * () const { return Data(); }
-      iterator& operator ++ () { return (*this); }
-      bool operator != (const iterator& i) const { return true; }
+      iterator() {}
+      iterator(const iterator& i) : _hashSet(i._hashSet), _ind(i._ind), _it(i._it) {}
+      iterator(const HashSet<Data>* hashSet, size_t ind, typename vector<Data>::iterator it)
+         :_hashSet(hashSet), _ind(ind), _it(it) {}
+      // iterator(const HashSet<Data>* hashSet, Data d): _hashSet(hashSet) {
+      // }
+      const Data& operator * () const { return *_it; }
+      iterator& operator ++ () {
+         ++_it;
+         if (_it == _hashSet->_buckets[_ind].end()) {
+            for (size_t i = _ind + 1; i < _hashSet->_numBuckets; ++i) {
+               if (!_hashSet->_buckets[i].empty()) {
+                  _ind = i; _it = _hashSet->_buckets[i].begin();
+                  break;
+               }
+            }
+         }
+         return (*this);
+      }
+      iterator operator ++ (int) { iterator ret(*this); ++(*this); return ret; }
+      iterator& operator -- () {
+         if (_it == _hashSet->_buckets[_ind].begin()) {
+            for (size_t i = _ind - 1; i >= 0; --i) {
+               if (!_hashSet->_buckets[i].empty()) {
+                  _ind = i; _it = --(_hashSet->_buckets[i].end());
+                  break;
+               }
+            }
+         }
+         else --_it;
+         return (*this);
+      }
+      iterator operator -- (int) { iterator ret(*this); --(*this); return ret; }
+      bool operator != (const iterator& i) const { return _it != i._it; }
+      bool operator == (const iterator& i) const { return _it == i._it; }
+      iterator& operator = (const iterator& i) const {
+          _hashSet = i._hashSet;
+          _ind = i._ind; _it = i._it;
+          return (*this);
+      }
    private:
+      const HashSet<Data>* _hashSet;
+      typename vector<Data>::iterator _it;
+      size_t _ind;
    };
 
    void init(size_t b) { _numBuckets = b; _buckets = new vector<Data>[b]; }
@@ -70,36 +110,88 @@ public:
    // TODO: implement these functions
    //
    // Point to the first valid data
-   iterator begin() const { return iterator(); }
+   iterator begin() const {
+      for (size_t i = 0; i < _numBuckets; ++i) {
+         if (!_buckets[i].empty()) {
+            return iterator(this, i, _buckets[i].begin());
+         }
+      }
+      return iterator(this, 0, _buckets[0].begin());
+   }
    // Pass the end
-   iterator end() const { return iterator(); }
+   iterator end() const {
+      for (int i = _numBuckets - 1; i >= 0; i--) {
+         if (!_buckets[i].empty()) {
+            return iterator(this, i, _buckets[i].end());
+         }
+      }
+      return begin();
+   }
    // return true if no valid data
-   bool empty() const { return true; }
+   bool empty() const { return size() == 0; }
    // number of valid data
-   size_t size() const { size_t s = 0; return s; }
+   size_t size() const {
+      size_t s = 0;
+      for (auto i : _buckets) s += i.size();
+      return s;
+   }
 
    // check if d is in the hash...
    // if yes, return true;
    // else return false;
-   bool check(const Data& d) const { return false; }
+   bool check(const Data& d) const {
+      size_t hash = d() % _numBuckets;
+      if (_buckets[hash].empty()) return false;
+      for (auto data : _buckets[hash])
+         if (data == d) return true;
+      return false;
+   }
 
    // query if d is in the hash...
    // if yes, replace d with the data in the hash and return true;
    // else return false;
-   bool query(Data& d) const { return false; }
+   bool query(Data& d) const {
+      size_t hash = d() % _numBuckets;
+      if (_buckets[hash].empty()) return false;
+      for (auto data : _buckets[hash])
+         if (data == d) { d = data; return true; }
+      return false;
+   }
 
    // update the entry in hash that is equal to d (i.e. == return true)
    // if found, update that entry with d and return true;
    // else insert d into hash as a new entry and return false;
-   bool update(const Data& d) { return false; }
+   bool update(const Data& d) {
+      size_t hash = d() % _numBuckets;
+      if (!_buckets[hash].empty()) {
+         for (auto& data : _buckets[hash])
+            if (data == d) { data = d; return true; }
+      }
+      _buckets[hash].push_back(d);
+      return false;
+   }
 
    // return true if inserted successfully (i.e. d is not in the hash)
    // return false is d is already in the hash ==> will not insert
-   bool insert(const Data& d) { return true; }
+   bool insert(const Data& d) {
+      if (check(d)) return false;
+      _buckets[d() % _numBuckets].push_back(d);
+      return true;
+   }
 
    // return true if removed successfully (i.e. d is in the hash)
    // return fasle otherwise (i.e. nothing is removed)
-   bool remove(const Data& d) { return false; }
+   bool remove(const Data& d) {
+      if (!check(d)) return false;
+      size_t hash = d() % _numBuckets;
+      for (size_t i = 0;i < _buckets[hash].size(); ++i) {
+         if (_buckets[hash][i] == d) {
+            swap(_buckets[hash][i], _buckets[hash].back());
+         }
+      }
+      _buckets[hash].pop_back();
+      return true;
+   }
 
 private:
    // Do not add any extra data member

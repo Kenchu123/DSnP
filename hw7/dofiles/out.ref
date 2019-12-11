@@ -1,0 +1,166 @@
+Testing do1
+task> taski 10
+Task manager is initialized (10)
+
+task> taskn -r 10
+Task node inserted: (vkuuxf, 6704)
+Task node inserted: (thomqj, 10268)
+Task node inserted: (yxqsdp, 326)
+Task node inserted: (gduekd, 2176)
+Task node inserted: (zfnvph, 12751)
+Task node inserted: (nmzhun, 15398)
+Task node inserted: (kxhjvx, 1395)
+Task node inserted: (yncerx, 6977)
+Task node inserted: (balbgz, 18044)
+Task node inserted: (wgojtn, 13354)
+... 10 new task nodes are added.
+
+task> taskq -heap
+(yxqsdp, 326)
+(gduekd, 2176)
+(kxhjvx, 1395)
+(yncerx, 6977)
+(zfnvph, 12751)
+(nmzhun, 15398)
+(vkuuxf, 6704)
+(thomqj, 10268)
+(balbgz, 18044)
+(wgojtn, 13354)
+Number of tasks: 10
+
+task> taska 100
+Task assignment succeeds...
+Updating min: (yxqsdp, 426)
+
+task> taskq -heap
+(yxqsdp, 426)
+(kxhjvx, 1395)
+(vkuuxf, 6704)
+(yncerx, 6977)
+(gduekd, 2176)
+(nmzhun, 15398)
+(wgojtn, 13354)
+(thomqj, 10268)
+(balbgz, 18044)
+(zfnvph, 12751)
+Number of tasks: 10
+
+task> taska 1000
+Task assignment succeeds...
+Updating min: (kxhjvx, 1395)
+
+task> taskq -heap
+(kxhjvx, 1395)
+(yxqsdp, 1426)
+(vkuuxf, 6704)
+(yncerx, 6977)
+(gduekd, 2176)
+(nmzhun, 15398)
+(wgojtn, 13354)
+(thomqj, 10268)
+(balbgz, 18044)
+(zfnvph, 12751)
+Number of tasks: 10
+
+task> taska 1000 -r 10
+Task assignment succeeds...
+Updating min: (yxqsdp, 1426)
+Task assignment succeeds...
+Updating min: (gduekd, 2176)
+Task assignment succeeds...
+Updating min: (kxhjvx, 2395)
+Task assignment succeeds...
+Updating min: (yxqsdp, 2426)
+Task assignment succeeds...
+Updating min: (gduekd, 3176)
+Task assignment succeeds...
+Updating min: (kxhjvx, 3395)
+Task assignment succeeds...
+Updating min: (yxqsdp, 3426)
+Task assignment succeeds...
+Updating min: (gduekd, 4176)
+Task assignment succeeds...
+Updating min: (kxhjvx, 4395)
+Task assignment succeeds...
+Updating min: (yxqsdp, 4426)
+
+task> taskq -heap
+(yxqsdp, 4426)
+(gduekd, 5176)
+(vkuuxf, 6704)
+(yncerx, 6977)
+(kxhjvx, 5395)
+(nmzhun, 15398)
+(wgojtn, 13354)
+(thomqj, 10268)
+(balbgz, 18044)
+(zfnvph, 12751)
+Number of tasks: 10
+
+task> q -f
+
+Testing do2
+Testing do3
+task> taski 10
+Task manager is initialized (10)
+
+task> taskn -r 1
+Task node inserted: (vkuuxf, 6704)
+... 1 new task nodes are added.
+
+task> taskn -n abcde 100
+Task node inserted: (abcde, 100)
+
+task> taskn -n qqqqq 8000
+Task node inserted: (qqqqq, 8000)
+
+task> taskn -n xxxxx 4000
+Task node inserted: (xxxxx, 4000)
+
+task> taskn -n xxxxx 3000
+
+task> taskn -n bbbbb 5000
+Task node inserted: (bbbbb, 5000)
+
+task> taskq -hash
+(vkuuxf, 6704)
+(xxxxx, 4000)
+(abcde, 100)
+(bbbbb, 5000)
+(qqqqq, 8000)
+Number of tasks: 5
+
+task> taskq -min
+Min task node: (abcde, 100)
+
+task> taska 1234 -r 4
+Task assignment succeeds...
+Updating min: (abcde, 1334)
+Task assignment succeeds...
+Updating min: (abcde, 2568)
+Task assignment succeeds...
+Updating min: (abcde, 3802)
+Task assignment succeeds...
+Updating min: (xxxxx, 4000)
+
+task> taskq -heap
+(xxxxx, 4000)
+(bbbbb, 5000)
+(qqqqq, 8000)
+(vkuuxf, 6704)
+(abcde, 5036)
+Number of tasks: 5
+
+task> taska 4321 -r 3
+Task assignment succeeds...
+Updating min: (bbbbb, 5000)
+Task assignment succeeds...
+Updating min: (abcde, 5036)
+Task assignment succeeds...
+Updating min: (vkuuxf, 6704)
+
+task> taskq -min
+Min task node: (vkuuxf, 6704)
+
+task> q -f
+
