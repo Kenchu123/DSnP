@@ -153,7 +153,7 @@ public:
    bool query(Data& d) const {
       size_t hash = d() % _numBuckets;
       if (_buckets[hash].empty()) return false;
-      for (auto data : _buckets[hash])
+      for (auto& data : _buckets[hash])
          if (data == d) { d = data; return true; }
       return false;
    }
@@ -187,6 +187,7 @@ public:
       for (size_t i = 0;i < _buckets[hash].size(); ++i) {
          if (_buckets[hash][i] == d) {
             swap(_buckets[hash][i], _buckets[hash].back());
+            break;
          }
       }
       _buckets[hash].pop_back();
