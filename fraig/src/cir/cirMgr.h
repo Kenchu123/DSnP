@@ -81,27 +81,27 @@ private:
   bool _readPI(fstream&);
   bool _readPO(fstream&);
   bool _readAIG(fstream&);
-  // bool _readSymbI(int , const string&);
-  // bool _readSymbO(int, const string&);
   bool _readSymb(fstream&);
-
   bool _notSpace(char);
   bool _beSpace(char);
   bool _readNum(string&, int&, string);
-
-  void _buildConnect();
-  void _dfs(CirGate*);
-
   bool _doComment;
   string _comment;
   string _type;
-
   int _M, _I, _L, _O, _A;
+
+  // for circuit
+  void _buildConnect();
+  void _dfs(CirGate*);
+
   vector<CirPiGate*> _pilist;
   vector<CirPoGate*> _polist;
   vector<CirAigGate*> _aiglist;
   vector<CirGate*> _dfslist;
   map<unsigned, CirGate*> _gatelist;
+
+  // for optimize
+  void _removeGate(unsigned, map<unsigned, CirGate*>::iterator* = 0);
 
 };
 

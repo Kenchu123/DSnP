@@ -60,7 +60,7 @@ CirGate::_dfsFanin(CirGate* g, unsigned spaces, bool inv, int level) {
    if (level == 0) return;
    g->setToGlobalRef();
    for (size_t i = 0; i < g->_fanin.size(); ++i) {
-      _dfsFanin(g->_fanin[i], spaces + 2, g->_inv[i], level - 1);
+      _dfsFanin(g->_fanin[i]._gate, spaces + 2, g->_fanin[i]._inv, level - 1);
    }
 }
 
@@ -86,22 +86,22 @@ CirGate::_dfsFanout(CirGate* g, unsigned spaces, bool inv, int level) {
    if (level == 0) return;
    g->setToGlobalRef();
    for (size_t i = 0; i < g->_fanout.size(); ++i) {
-      _dfsFanout(g->_fanout[i], spaces + 2, g->_outv[i], level - 1);
+      _dfsFanout(g->_fanout[i].gate(), spaces + 2, g->_fanout[i].inv(), level - 1);
    }
 }
 
  void 
  CirGate::connect(map<unsigned, CirGate*>& gatelist) {
     for (size_t i = 0;i < _fanin.size(); ++i) {
-      size_t inVar = (size_t)(void*)_fanin[i];
+      size_t inVar = (size_t)(void*)_fanin[i]._gate;
        if (gatelist.find(inVar) == gatelist.end()) {
           CirGate* floatGate = new CirGate(inVar, 0, UNDEF_GATE);
           gatelist[inVar] = floatGate;
        }
       // set _fanin and _fanout
-      _fanin[i] = gatelist[inVar];
-      _fanin[i]->_fanout.push_back(this);
-      _fanin[i]->_outv.push_back(_inv[i]);
+      _fanin[i]._gate = gatelist[inVar];
+      _fanin[i]._gate->_fanout.emplace_back(this, _fanin[i]._inv);
+      // _fanin[i]._gate->_outv.push_back(_inv[i]);
     }
  }
 
@@ -109,6 +109,6 @@ void
 CirGate::reset() {
    _fanin.clear();
    _fanout.clear();
-   _inv.clear();
-   _outv.clear();
+   // _inv.clear();
+   // _outv.clear();
 }

@@ -270,10 +270,10 @@ CirMgr::_readPI(fstream& file) {
       if (lit / 2 > _M) return parseError(MAX_LIT_ID);
 
       CirPiGate* newPi = new CirPiGate(lit, lineNo + 1);
-      for (auto g : _pilist) if (g->getVar() == lit / 2) {
-         errGate = g;
-         return parseError(REDEF_GATE);
-      }
+      // for (auto g : _pilist) if (g->getVar() == lit / 2) {
+      //    errGate = g;
+      //    return parseError(REDEF_GATE);
+      // }
       _pilist.push_back(newPi);
       _gatelist[newPi->getVar()] = newPi;
       ++lineNo;
@@ -296,10 +296,10 @@ CirMgr::_readPO(fstream& file) {
       if (lit / 2 > _M) return parseError(MAX_LIT_ID);
 
       CirPoGate* newPo = new CirPoGate(lit, re + _M, lineNo + 1);
-      for (auto g : _polist) if (g->getVar() == lit / 2) {
-         errGate = g;
-         return parseError(REDEF_GATE);
-      }
+      // for (auto g : _polist) if (g->getVar() == lit / 2) {
+      //    errGate = g;
+      //    return parseError(REDEF_GATE);
+      // }
       _polist.push_back(newPo);
       _gatelist[newPo->getVar()] = newPo;
       ++lineNo;
@@ -340,14 +340,14 @@ CirMgr::_readAIG(fstream& file) {
       if (colNo < line.size()) return parseError(MISSING_NEWLINE);
 
       CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo + 1);
-      for (auto g : _aiglist) if (g->getVar() == lit / 2) {
-         errGate = g;
-         return parseError(REDEF_GATE);
-      }
-      for (auto g : _pilist) if (g->getVar() == lit / 2) {
-         errGate = g;
-         return parseError(REDEF_GATE);
-      }
+      // for (auto g : _aiglist) if (g->getVar() == lit / 2) {
+      //    errGate = g;
+      //    return parseError(REDEF_GATE);
+      // }
+      // for (auto g : _pilist) if (g->getVar() == lit / 2) {
+      //    errGate = g;
+      //    return parseError(REDEF_GATE);
+      // }
       _aiglist.push_back(newAig);
       _gatelist[newAig->getVar()] = newAig;
       ++lineNo;
@@ -459,19 +459,12 @@ CirMgr::printNetlist() const
       cout << "[" << i << "] ";
       cout << left << setw(4) << g->getTypeStr() << g->_var;
       for (size_t j = 0;j < g->_fanin.size(); ++j) {
-         cout << " " << (g->_fanin[j]->_gateType == UNDEF_GATE ? "*" : "") \
-            << (g->_inv[j] ? "!" : "") << g->_fanin[j]->_var;
+         cout << " " << (g->_fanin[j].gate()->_gateType == UNDEF_GATE ? "*" : "") \
+            << (g->_fanin[j].inv() ? "!" : "") << g->_fanin[j].gate()->_var;
       }
       if (g->_symbo != "") cout << " (" << g->_symbo << ")";
       cout << endl;
    }
-/*
-   cout << endl;
-   for (unsigned i = 0, n = _dfsList.size(); i < n; ++i) {
-      cout << "[" << i << "] ";
-      _dfsList[i]->printGate();
-   }
-*/
 }
 
 void
@@ -501,7 +494,7 @@ CirMgr::printFloatGates() const
       CirGate* gate = it->second;
       if (gate->getType() == CONST_GATE || gate->getType() == UNDEF_GATE) continue;
       for (auto i : gate->_fanin) {
-         if (i->getType() == UNDEF_GATE) {
+         if (i.gate()->getType() == UNDEF_GATE) {
             fltFanins.push_back(gate->getVar());
             break;
          }
@@ -541,13 +534,13 @@ CirMgr::writeAag(ostream& outfile) const
 
    for (auto i : _pilist) outfile << i->_var * 2 << endl;
    for (auto i : _polist) {
-      outfile << i->_fanin[0]->_var * 2 + int(i->_inv[0]) << endl;
+      outfile << i->_fanin[0].gate()->_var * 2 + int(i->_fanin[0].inv()) << endl;
    }
    for (auto i : _dfslist) {
       if (i->_gateType == AIG_GATE) {
          outfile << i->_var * 2;
          for (size_t j = 0;j < i->_fanin.size(); ++j) {
-            outfile << " " << i->_fanin[j]->_var * 2 + int(i->_inv[j]);
+            outfile << " " << i->_fanin[j].gate()->_var * 2 + int(i->_fanin[j].inv());
          }
          outfile << endl;
       }
@@ -586,11 +579,14 @@ void
 CirMgr::_dfs(CirGate* gate) {
    gate->setToGlobalRef();
    for (size_t i = 0;i < gate->_fanin.size(); ++i) {
-      if (!gate->_fanin[i]->isGlobalRef()) {
-         _dfs(gate->_fanin[i]);
+      if (!gate->_fanin[i].gate()->isGlobalRef()) {
+         _dfs(gate->_fanin[i].gate());
       }
    }
-   if (gate->_gateType != UNDEF_GATE) _dfslist.push_back(gate);
+   if (gate->_gateType != UNDEF_GATE) {
+      _dfslist.push_back(gate);
+   }
+   gate->_inDFSlist = true;
 }
 
 void

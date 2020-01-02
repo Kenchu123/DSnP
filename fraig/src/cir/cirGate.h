@@ -22,10 +22,26 @@ using namespace std;
 //   Define classes
 //------------------------------------------------------------------------
 class CirGate;
-class CirGate;
 class CirPiGate;
 class CirPoGate;
 class CirAigGate;
+
+class CirGateV {
+  public:
+  friend class CirGate;
+  friend class CirPiGate;
+  friend class CirPoGate;
+  friend class CirAigGate;
+
+  CirGateV() {}
+  CirGateV(CirGate* g, bool inv): _gate(g), _inv(inv) {}
+  CirGate* gate() const { return _gate; }
+  bool inv() const { return _inv; }
+
+  protected:
+  CirGate* _gate;
+  bool _inv;
+};
 
 class CirGate
 {
@@ -33,6 +49,7 @@ public:
   CirGate() {}
   CirGate(int var, int lineNo, GateType gateType) {
     _var = var; _lineNo = lineNo; _gateType = gateType;
+    _inDFSlist = false;
   }
   virtual ~CirGate() { reset(); }
 
@@ -86,11 +103,15 @@ protected:
   GateType _gateType;
   unsigned _var;
   unsigned _lineNo;
-  vector<CirGate*> _fanin;
-  vector<CirGate*> _fanout;
-  vector<bool> _inv; // input inverse
-  vector<bool> _outv; // output inverse
+  vector<CirGateV> _fanin;
+  vector<CirGateV> _fanout;
+  // vector<CirGate*> _fanin;
+  // vector<CirGate*> _fanout;
+  // vector<bool> _inv; // input inverse
+  // vector<bool> _outv; // output inverse
   string _symbo;
+
+  bool _inDFSlist;
 };
 
 class CirPiGate : public CirGate
@@ -102,6 +123,7 @@ public:
     _lineNo = lineNo;
     _var = lit / 2;
     _symbo = "";
+    _inDFSlist = false;
   }
   ~CirPiGate() { reset(); }
 };
@@ -114,11 +136,13 @@ public:
     _gateType = PO_GATE;
     _lineNo = lineNo;
     _var = var;
+    _inDFSlist = false;
 
-    _inv.push_back(srclit % 2 == 1 ? 1 : 0);
+    // _inv.push_back(srclit % 2 == 1 ? 1 : 0);
 
     size_t srcVar = (size_t)(srclit / 2);
-    _fanin.push_back((CirGate*)srcVar);
+    // _fanin.push_back((CirGate*)srcVar);
+    _fanin.emplace_back((CirGate*)srcVar, srclit % 2 == 1 ? 1 : 0);
     _symbo = "";
   }
   ~CirPoGate() { reset(); }
@@ -132,14 +156,17 @@ public:
     _gateType = AIG_GATE;
     _lineNo = lineNo;
     _var = lit / 2;
+    _inDFSlist = false;
 
-    _inv.push_back(src1 % 2 == 1 ? 1 : 0);
-    _inv.push_back(src2 % 2 == 1 ? 1 : 0);
+    // _inv.push_back(src1 % 2 == 1 ? 1 : 0);
+    // _inv.push_back(src2 % 2 == 1 ? 1 : 0);
 
     size_t var1 = (size_t)(src1 / 2);
     size_t var2 = (size_t)(src2 / 2);
-    _fanin.push_back((CirGate*)var1);
-    _fanin.push_back((CirGate*)var2);
+    // _fanin.push_back((CirGate*)var1);
+    // _fanin.push_back((CirGate*)var2);
+    _fanin.emplace_back((CirGate*)var1, src1 % 2 == 1 ? 1 : 0);
+    _fanin.emplace_back((CirGate*)var2, src2 % 2 == 1 ? 1 : 0);
     _symbo = "";
   }
   ~CirAigGate() { reset(); }
