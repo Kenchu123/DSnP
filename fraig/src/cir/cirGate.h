@@ -28,6 +28,7 @@ class CirAigGate;
 
 class CirGateV {
   public:
+  friend class CirMgr;
   friend class CirGate;
   friend class CirPiGate;
   friend class CirPoGate;

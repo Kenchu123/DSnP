@@ -44,6 +44,7 @@ public:
    void sweep();
    void optimize();
 
+
    // Member functions about simulation
    void randomSim();
    void fileSim(ifstream&);
@@ -102,6 +103,7 @@ private:
 
   // for optimize
   void _removeGate(unsigned, map<unsigned, CirGate*>::iterator* = 0);
+  void _replaceGateTo(CirGate*, CirGateV);
 
 };
 
