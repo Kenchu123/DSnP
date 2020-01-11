@@ -51,6 +51,7 @@ CirMgr::optimize()
 {
   for (auto& g : _dfslist) {
     if (g->getType() != AIG_GATE) continue;
+    assert(g->_fanin.size() == 2);
     CirGateV& A = g->_fanin[0];
     CirGateV& B = g->_fanin[1];
     if(A.gate()->getType() == CONST_GATE) {

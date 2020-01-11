@@ -101,9 +101,13 @@ private:
   vector<CirGate*> _dfslist;
   map<unsigned, CirGate*> _gatelist;
 
-  // for optimize
+  // optimize
   void _removeGate(unsigned, map<unsigned, CirGate*>::iterator* = 0);
   void _replaceGateTo(CirGate*, CirGateV);
+
+  // strash
+  unsigned long long _hashFanin(CirGate*);
+  void _mergeGate(CirGate*, CirGate*);
 
 };
 
