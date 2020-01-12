@@ -93,6 +93,18 @@ public:
 
   void reset();
 
+  void setSimVal(size_t& val) {
+    _valCh = (val == _simVal ? 0 : 1);
+    _simVal = val;
+  }
+  size_t getSimVal() { return _simVal; }
+  bool doSim () { return _doSim; }
+  bool valCh () { return _valCh; }
+  void reset_sim() { _doSim = 0; }
+  bool sim();
+  void printSim() const;
+  void printFECs() const;
+
 private:
   static unsigned _globalRef;
   unsigned _ref;
@@ -106,11 +118,11 @@ protected:
   unsigned _lineNo;
   vector<CirGateV> _fanin;
   vector<CirGateV> _fanout;
-  // vector<CirGate*> _fanin;
-  // vector<CirGate*> _fanout;
-  // vector<bool> _inv; // input inverse
-  // vector<bool> _outv; // output inverse
   string _symbo;
+
+  size_t _simVal;
+  bool _valCh;
+  bool _doSim;
 
   bool _inDFSlist;
 };
@@ -139,10 +151,7 @@ public:
     _var = var;
     _inDFSlist = false;
 
-    // _inv.push_back(srclit % 2 == 1 ? 1 : 0);
-
     size_t srcVar = (size_t)(srclit / 2);
-    // _fanin.push_back((CirGate*)srcVar);
     _fanin.emplace_back((CirGate*)srcVar, srclit % 2 == 1 ? 1 : 0);
     _symbo = "";
   }
@@ -159,13 +168,8 @@ public:
     _var = lit / 2;
     _inDFSlist = false;
 
-    // _inv.push_back(src1 % 2 == 1 ? 1 : 0);
-    // _inv.push_back(src2 % 2 == 1 ? 1 : 0);
-
     size_t var1 = (size_t)(src1 / 2);
     size_t var2 = (size_t)(src2 / 2);
-    // _fanin.push_back((CirGate*)var1);
-    // _fanin.push_back((CirGate*)var2);
     _fanin.emplace_back((CirGate*)var1, src1 % 2 == 1 ? 1 : 0);
     _fanin.emplace_back((CirGate*)var2, src2 % 2 == 1 ? 1 : 0);
     _symbo = "";

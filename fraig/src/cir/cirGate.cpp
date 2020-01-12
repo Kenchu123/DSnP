@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdarg.h>
 #include <cassert>
+#include <bitset>
 #include "cirGate.h"
 #include "cirMgr.h"
 #include "util.h"
@@ -31,11 +32,15 @@ unsigned CirGate::_globalRef = 0;
 void
 CirGate::reportGate() const
 {
-   cout << "==================================================" << endl;
+   for (int i = 0;i < 80; ++i) cout << "=";
+   cout << endl;
    string s = "= " + getTypeStr() + "(" + to_string(_var) + ")" \
       + (_symbo == "" ? "" : "\"" + _symbo + "\"") + ", line " + to_string(_lineNo);
-   cout << s << right << setw(50 - s.size()) << "=" << endl;
-   cout << "==================================================" << endl;
+   cout << s << endl;
+   printFECs();
+   printSim();
+   for (int i = 0;i < 80; ++i) cout << "=";
+   cout << endl;
 }
 
 void
@@ -101,7 +106,6 @@ CirGate::_dfsFanout(CirGate* g, unsigned spaces, bool inv, int level) {
       // set _fanin and _fanout
       _fanin[i]._gate = gatelist[inVar];
       _fanin[i]._gate->_fanout.emplace_back(this, _fanin[i]._inv);
-      // _fanin[i]._gate->_outv.push_back(_inv[i]);
     }
  }
 
@@ -109,6 +113,35 @@ void
 CirGate::reset() {
    _fanin.clear();
    _fanout.clear();
-   // _inv.clear();
-   // _outv.clear();
+}
+
+bool
+CirGate::sim() {
+   if (_gateType == PI_GATE) return _valCh;
+   if (_gateType == UNDEF_GATE || _gateType == CONST_GATE) return false;
+
+   size_t simVal = ~0;
+   for (auto& g : _fanin) {
+      // if (!g._gate->_doSim) g._gate->sim();
+      simVal &= (g._inv ? ~g._gate->_simVal : g._gate->_simVal);
+   }
+   _doSim = true;
+   setSimVal(simVal);
+   // cout << "Simulating " << getVar() << ", Simulate result: " << simVal << endl;
+   return _valCh;
+}
+
+void
+CirGate::printSim() const {
+   cout << "= Value: ";
+   bitset<64> bit(_simVal);
+   string bString = bit.to_string();
+   for (size_t i = 0; i < 64; ++i) {
+      cout << ((i % 8 == 0 && i != 0) ? "_" : "") << bString[i];
+   }
+   cout << endl;
+}
+
+void CirGate::printFECs() const {
+   cout << "= FECs:" << endl;
 }

@@ -28,7 +28,7 @@ class CirMgr
 {
 public:
    CirMgr(): _M(0), _I(0), _L(0), _O(0), _A(0), _doComment(0), _comment(""), _type("") {}
-   ~CirMgr() {} 
+   ~CirMgr() { reset(); } 
 
    // Access functions
    // return '0' if "gid" corresponds to an undefined gate.
@@ -109,6 +109,10 @@ private:
   unsigned long long _hashFanin(CirGate*);
   void _mergeGate(CirGate*, CirGate*);
 
+  // simulate
+  size_t _cnt, _logCnt;
+  void _simPattern(vector<size_t>&);
+  void _genLog(vector<size_t>&);
 };
 
 #endif // CIR_MGR_H
