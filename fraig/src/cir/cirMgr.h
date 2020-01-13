@@ -118,7 +118,6 @@ private:
   void _initfecGrp();
   bool _initfec;
   vector<FecGrp*> _fecGrps;
-  vector<FecGrp*> _IfecGrps;
 };
 
 
@@ -130,13 +129,12 @@ public:
    FecGrp(CirGate* g, bool inv = 0) {
       _child[g->getVar()] = CirGateV(g, inv);
       g->setFecGrp(this);
-      // inv ? g->setIFecGrp(this) : g->setFecGrp(this);
    }
    void add(CirGate* g, bool inv = 0) {
       _child[g->getVar()] = CirGateV(g, inv);
       g->setFecGrp(this);
-      // inv ? g->setIFecGrp(this) : g->setFecGrp(this);
    }
+   ~FecGrp() { _child.clear(); }
 
 private:
    map<size_t, CirGateV> _child; // fec group child

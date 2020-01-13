@@ -595,11 +595,6 @@ CirMgr::reset() {
    _polist.clear();
    _aiglist.clear();
    _dfslist.clear();
-   for (map<unsigned, CirGate*>::iterator it = _gatelist.begin(); it != _gatelist.end(); ++it) {
-      delete it->second;
-   }
-   _gatelist.clear();
-   CirMgr::Const0 = new CirGate(0, 0, CONST_GATE);
 
    _M = _I = _L = _O = _A = 0;
    _doComment = 0;
@@ -607,5 +602,17 @@ CirMgr::reset() {
 
    lineNo = 0;
    colNo = 0;
+   for (int i = 0;i < _fecGrps.size(); ++i) {
+      delete _fecGrps[i];
+   }
+   _fecGrps.clear();
+   _initfec = 0;
+   _cnt = 0; _logCnt = 0;
+   
+   for (map<unsigned, CirGate*>::iterator it = _gatelist.begin(); it != _gatelist.end(); ++it) {
+      delete it->second;
+   }
+   _gatelist.clear();
+   CirMgr::Const0 = new CirGate(0, 0, CONST_GATE);
 }
 

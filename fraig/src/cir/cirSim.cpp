@@ -43,12 +43,10 @@ CirMgr::randomSim()
 void
 CirMgr::fileSim(ifstream& patternFile)
 {
-  if (!_initfec) _initfecGrp();
+  
   string pattern = "";
   _cnt = 0, _logCnt = 0;
   vector<size_t> vec; vec.resize(_I);
-  // size_t* vec = new size_t(_I);
-  // for (size_t i = 0;i < _I; ++i) vec[i] = (size_t)0;
   while (patternFile >> pattern) {
     if (pattern.size() == 0) break;
 
@@ -60,6 +58,7 @@ CirMgr::fileSim(ifstream& patternFile)
     for (size_t i = 0;i < _I; ++i) {
       if (pattern[i] != '0' && pattern[i] != '1') {
         cerr << "Error: Pattern(" << pattern << ") contains a non-0/1 character(\'" << pattern[i] << "\')." << endl;
+        cout << (_cnt / 64) * 64 << " patterns simulated." << endl;
         return;
       }
       if (pattern[i] == '1') vec[i] |= ((size_t)1 << (_cnt % 64));
@@ -69,14 +68,17 @@ CirMgr::fileSim(ifstream& patternFile)
       _simPattern(vec);
       _genfecGrp();
       _genLog(vec);
-      // for (size_t i = 0;i < _I; ++i) vec[i] &= 0;
       vec.clear(); vec.resize(_I);
     }
   }
-  if (_cnt % 64) _simPattern(vec);
-  _genfecGrp();
-  _genLog(vec);
-  cout << "Simulates " << _cnt << " patterns" << endl;
+  if (_cnt % 64) {
+    _simPattern(vec);
+    _genfecGrp();
+    _genLog(vec);
+  }
+  vec.clear();
+  cout << _cnt << " patterns simulated." << endl;
+  // cout << "Total #FEC Group = " << _fecGrps.size() << endl;
 }
 
 /*************************************************/
@@ -94,16 +96,7 @@ void CirMgr::_simPattern(vector<size_t>& pattern) {
   //   cout << g->_simVal << ", valCh: " << g->_valCh << " ";
   // }
   // cout << endl;
-
-  // for (auto& g : _dfslist) g->reset_sim();
-
-  // for (auto& g : _dfslist) {
-  //   if (g->getType() == PO_GATE) g->sim();
-  // }
   for (auto& g: _dfslist) g->sim();
-  // gen FEC list
-  // cout << "Generating FEC List..." << endl;
-
 }
 
 void CirMgr::_genLog(vector<size_t>& pattern) {
@@ -114,7 +107,7 @@ void CirMgr::_genLog(vector<size_t>& pattern) {
     }
     (*_simLog) << " ";
     for (auto& g : _polist) {
-      (*_simLog) << ((g->getSimVal() >> i) & 1);
+      (*_simLog) << ((g->_simVal >> i) & 1);
     }
     (*_simLog) << endl;
   }
@@ -122,49 +115,50 @@ void CirMgr::_genLog(vector<size_t>& pattern) {
 
 void CirMgr::_initfecGrp() {
   assert(_initfec == 0);
-  _initfec = 1;
+  _fecGrps.clear();
+
   FecGrp* newFecGrp = new FecGrp(Const0);
-  // FecGrp* InewFecGrp = new FecGrp(Const0, 1);
   _fecGrps.push_back(newFecGrp);
-  // _IfecGrps.push_back(InewFecGrp);
   for (auto& g: _dfslist) {
     if (g->getType() == AIG_GATE) {
       _fecGrps[0]->add(g);
-      // _IfecGrps[0]->add(g, 1);
     }
   }
+  _initfec = 1;
   // cout << "Initial Fec Group: ";
   // for (auto& fecgrp : _fecGrps) {
   //   for (auto it = fecgrp->_child.begin(); it != fecgrp->_child.end(); ++it) {
-  //     cout << it->second.gate()->getVar() << " ";
+  //     cout << it->second._gate->getVar() << " ";
   //   }
   //   cout << endl;
   // }
 }
 
 void CirMgr::_genfecGrp() {
+  if (!_initfec) _initfecGrp();
   size_t size = _fecGrps.size();
   for (size_t i = 0;i < size; ++i) {
+    if (_fecGrps[i]->_child.size() == 1) continue; // optimize
     FecGrp* fecGrp = _fecGrps[i];
 
     map<size_t, FecGrp*> mp;  // simVal to fecGrp
     map<size_t, CirGateV>& ch = fecGrp->_child;
 
     assert(!ch.empty());
-    size_t val = ch.begin()->second.gate()->getSimVal();
-    if (ch.begin()->second.inv()) val = ~val; // IFec
+    size_t val = ch.begin()->second._gate->_simVal;
+    if (ch.begin()->second._inv) val = ~val; // IFec
     mp[val] = fecGrp;
 
     for (map<size_t, CirGateV>::iterator it = ++ch.begin(); it != ch.end();) {
-      size_t chVal = it->second.gate()->getSimVal();
-      if (it->second.inv()) chVal = ~chVal; // IFec
+      size_t chVal = it->second._gate->_simVal;
+
       if (chVal != val && ~chVal != val) {
         auto foundFe = mp.find(chVal);
         auto foundIFec = mp.find(~chVal);
 
         if (foundFe == mp.end() && foundIFec == mp.end()) {
-          // cout << "Add new FecGrp for " << it->second.gate()->getVar() << endl;
-          FecGrp* newFecGrp = new FecGrp(it->second.gate(), it->second.inv());
+          // cout << "Add new FecGrp for " << it->second._gate->getVar() << endl;
+          FecGrp* newFecGrp = new FecGrp(it->second._gate, it->second._inv);
           _fecGrps.push_back(newFecGrp);
           mp[chVal] = _fecGrps.back();
         }
@@ -172,14 +166,14 @@ void CirMgr::_genfecGrp() {
         else {
           auto found = (foundFe == mp.end()) ? foundIFec : foundFe;
           bool inv = (foundFe == mp.end());
-          // cout << "Add " << it->second.gate()->getVar() << ", to old FecGrp" << endl;
-          found->second->add(it->second.gate(), inv);
+          // cout << "Add " << it->second._gate->getVar() << ", to old FecGrp" << endl;
+          found->second->add(it->second._gate, inv);
         }
         it = ch.erase(it);
       }
       else {
         if (~chVal == val) {
-          // cout << "IFEC: " << it->second.gate()->getVar() << endl;
+          // cout << "IFEC: " << it->second._gate->getVar() << endl;
           it->second._inv = 1;
         }
         ++it;

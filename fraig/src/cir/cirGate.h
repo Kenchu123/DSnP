@@ -51,8 +51,10 @@ public:
   CirGate() {}
   CirGate(int var, int lineNo, GateType gateType) {
     _var = var; _lineNo = lineNo; _gateType = gateType;
-    _inDFSlist = false;
+    _gateInit();
   }
+  
+
   virtual ~CirGate() { reset(); }
 
   friend class CirMgr;
@@ -106,10 +108,15 @@ public:
   void printSim() const;
   void printFECs() const;
   void setFecGrp(FecGrp* fec) { _fecGrp = fec; }
-  void setIFecGrp(FecGrp* fec) { _IfecGrp = fec; }
   FecGrp* getFecGrp() { return _fecGrp; }
-  FecGrp* getIFecGrp() { return _IfecGrp; }
 
+  void _gateInit() {
+    _inDFSlist = false;
+    _fecGrp = 0;
+    _simVal = 0;
+    _valCh = 0;
+    _doSim = 0;
+  }
 private:
   static unsigned _globalRef;
   unsigned _ref;
@@ -129,7 +136,6 @@ protected:
   bool _valCh;
   bool _doSim;
   FecGrp* _fecGrp;
-  FecGrp* _IfecGrp;
 
   bool _inDFSlist;
 };
@@ -143,7 +149,7 @@ public:
     _lineNo = lineNo;
     _var = lit / 2;
     _symbo = "";
-    _inDFSlist = false;
+    _gateInit();
   }
   ~CirPiGate() { reset(); }
 };
@@ -156,11 +162,11 @@ public:
     _gateType = PO_GATE;
     _lineNo = lineNo;
     _var = var;
-    _inDFSlist = false;
 
     size_t srcVar = (size_t)(srclit / 2);
     _fanin.emplace_back((CirGate*)srcVar, srclit % 2 == 1 ? 1 : 0);
     _symbo = "";
+    _gateInit();
   }
   ~CirPoGate() { reset(); }
 };
@@ -173,7 +179,7 @@ public:
     _gateType = AIG_GATE;
     _lineNo = lineNo;
     _var = lit / 2;
-    _inDFSlist = false;
+     _gateInit();
 
     size_t var1 = (size_t)(src1 / 2);
     size_t var2 = (size_t)(src2 / 2);

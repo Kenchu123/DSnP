@@ -113,6 +113,11 @@ void
 CirGate::reset() {
    _fanin.clear();
    _fanout.clear();
+   _fecGrp = 0;
+   _simVal = 0;
+   _valCh = 0;
+   _doSim = 0;
+   _inDFSlist = 0;
 }
 
 bool
@@ -144,8 +149,12 @@ CirGate::printSim() const {
 
 void CirGate::printFECs() const {
    cout << "= FECs:";
-   if (!_fecGrp) { cout << endl; return; }
-   bool MeInv = _fecGrp->_child[_var].inv();
+   if (_fecGrp == 0) { cout << endl; return; }
+   assert(_fecGrp != 0);
+   bool MeInv = 0;
+   if (_fecGrp->_child.find(_var) != _fecGrp->_child.end()) {
+      MeInv = _fecGrp->_child[_var].inv();
+   }
    for (auto it = _fecGrp->_child.begin(); it != _fecGrp->_child.end(); ++it) {
       if (it->second.gate() != this) {
          cout << " " << (MeInv ^it->second.inv() ? "!" : "") << it->second.gate()->getVar();
