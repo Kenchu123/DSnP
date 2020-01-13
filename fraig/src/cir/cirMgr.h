@@ -134,7 +134,11 @@ public:
       _child[g->getVar()] = CirGateV(g, inv);
       g->setFecGrp(this);
    }
-   ~FecGrp() { _child.clear(); }
+   ~FecGrp() {
+      for (auto it = _child.begin(); it != _child.end(); ++it) 
+         it->second.gate()->setFecGrp(0);
+      _child.clear();
+   }
 
 private:
    map<size_t, CirGateV> _child; // fec group child

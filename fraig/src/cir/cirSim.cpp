@@ -78,7 +78,7 @@ CirMgr::fileSim(ifstream& patternFile)
   }
   vec.clear();
   cout << _cnt << " patterns simulated." << endl;
-  // cout << "Total #FEC Group = " << _fecGrps.size() << endl;
+  cout << "Total #FEC Group = " << _fecGrps.size() << endl;
 }
 
 /*************************************************/
@@ -137,9 +137,10 @@ void CirMgr::_initfecGrp() {
 void CirMgr::_genfecGrp() {
   if (!_initfec) _initfecGrp();
   size_t size = _fecGrps.size();
+  auto grpIt = _fecGrps.begin();
   for (size_t i = 0;i < size; ++i) {
-    if (_fecGrps[i]->_child.size() == 1) continue; // optimize
     FecGrp* fecGrp = _fecGrps[i];
+    // FecGrp* fecGrp = *grpIt;
 
     map<size_t, FecGrp*> mp;  // simVal to fecGrp
     map<size_t, CirGateV>& ch = fecGrp->_child;
@@ -155,14 +156,12 @@ void CirMgr::_genfecGrp() {
       if (chVal != val && ~chVal != val) {
         auto foundFe = mp.find(chVal);
         auto foundIFec = mp.find(~chVal);
-
         if (foundFe == mp.end() && foundIFec == mp.end()) {
           // cout << "Add new FecGrp for " << it->second._gate->getVar() << endl;
           FecGrp* newFecGrp = new FecGrp(it->second._gate, it->second._inv);
-          _fecGrps.push_back(newFecGrp);
-          mp[chVal] = _fecGrps.back();
+          // _fecGrps.push_back(newFecGrp);
+          mp[chVal] = newFecGrp;
         }
-
         else {
           auto found = (foundFe == mp.end()) ? foundIFec : foundFe;
           bool inv = (foundFe == mp.end());
@@ -179,5 +178,29 @@ void CirMgr::_genfecGrp() {
         ++it;
       }
     }
+    // delete this one if its size = 1
+    // if (fecGrp->_child.size() == 1) {
+    //   grpIt = _fecGrps.erase(grpIt);
+    //   delete fecGrp;
+    // }
+    // else ++grpIt;
+    // ++grpIt;
+    
+    // collect valid fecgrp
+    // push_back only fecgrp which size > 1
+    for (auto it = mp.begin(); it != mp.end(); ++it) {
+      if (it->second == fecGrp) continue;
+      if (it->second->_child.size() == 1) delete it->second;
+      else _fecGrps.push_back(it->second);
+    }
+  }
+  // delete invalid fecgrp
+  size_t cnt = 0;
+  for (vector<FecGrp*>::iterator fg = _fecGrps.begin(); fg != _fecGrps.end() && cnt < size; ++cnt) {
+    if ((*fg)->_child.size() <= 1) {
+      delete (*fg);
+      fg = _fecGrps.erase(fg);
+    }
+    else ++fg;
   }
 }
