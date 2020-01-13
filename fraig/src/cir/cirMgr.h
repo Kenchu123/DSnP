@@ -128,16 +128,18 @@ public:
    friend CirGate;
    FecGrp() {}
    FecGrp(CirGate* g, bool inv = 0) {
-      _child[g->getVar()] = g;
-      inv ? g->setIFecGrp(this) : g->setFecGrp(this);
+      _child[g->getVar()] = CirGateV(g, inv);
+      g->setFecGrp(this);
+      // inv ? g->setIFecGrp(this) : g->setFecGrp(this);
    }
    void add(CirGate* g, bool inv = 0) {
-      _child[g->getVar()] = g;
-      inv ? g->setIFecGrp(this) : g->setFecGrp(this);
+      _child[g->getVar()] = CirGateV(g, inv);
+      g->setFecGrp(this);
+      // inv ? g->setIFecGrp(this) : g->setFecGrp(this);
    }
 
 private:
-   map<size_t, CirGate*> _child; // fec group child
+   map<size_t, CirGateV> _child; // fec group child
 };
 
 #endif // CIR_MGR_H

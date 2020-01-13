@@ -124,19 +124,19 @@ void CirMgr::_initfecGrp() {
   assert(_initfec == 0);
   _initfec = 1;
   FecGrp* newFecGrp = new FecGrp(Const0);
-  FecGrp* InewFecGrp = new FecGrp(Const0, 1);
+  // FecGrp* InewFecGrp = new FecGrp(Const0, 1);
   _fecGrps.push_back(newFecGrp);
-  _IfecGrps.push_back(InewFecGrp);
+  // _IfecGrps.push_back(InewFecGrp);
   for (auto& g: _dfslist) {
     if (g->getType() == AIG_GATE) {
       _fecGrps[0]->add(g);
-      _IfecGrps[0]->add(g, 1);
+      // _IfecGrps[0]->add(g, 1);
     }
   }
   // cout << "Initial Fec Group: ";
   // for (auto& fecgrp : _fecGrps) {
   //   for (auto it = fecgrp->_child.begin(); it != fecgrp->_child.end(); ++it) {
-  //     cout << it->second->getVar() << " ";
+  //     cout << it->second.gate()->getVar() << " ";
   //   }
   //   cout << endl;
   // }
@@ -148,67 +148,42 @@ void CirMgr::_genfecGrp() {
     FecGrp* fecGrp = _fecGrps[i];
 
     map<size_t, FecGrp*> mp;  // simVal to fecGrp
-    map<size_t, CirGate*>& ch = fecGrp->_child;
+    map<size_t, CirGateV>& ch = fecGrp->_child;
 
     assert(!ch.empty());
-    size_t val = ch.begin()->second->getSimVal();
+    size_t val = ch.begin()->second.gate()->getSimVal();
+    if (ch.begin()->second.inv()) val = ~val; // IFec
     mp[val] = fecGrp;
 
-    for (map<size_t, CirGate*>::iterator it = ch.begin(); it != ch.end();) {
-      size_t chVal = it->second->getSimVal();
-      if (chVal != val) {
-        auto found = mp.find(chVal);
-        if (found == mp.end()) {
-          // cout << "Add new FecGrp for " << it->second->getVar() << endl;
-          FecGrp* newFecGrp = new FecGrp(it->second);
+    for (map<size_t, CirGateV>::iterator it = ++ch.begin(); it != ch.end();) {
+      size_t chVal = it->second.gate()->getSimVal();
+      if (it->second.inv()) chVal = ~chVal; // IFec
+      if (chVal != val && ~chVal != val) {
+        auto foundFe = mp.find(chVal);
+        auto foundIFec = mp.find(~chVal);
+
+        if (foundFe == mp.end() && foundIFec == mp.end()) {
+          // cout << "Add new FecGrp for " << it->second.gate()->getVar() << endl;
+          FecGrp* newFecGrp = new FecGrp(it->second.gate(), it->second.inv());
           _fecGrps.push_back(newFecGrp);
           mp[chVal] = _fecGrps.back();
         }
+
         else {
-          // cout << "Add " << it->second->getVar() << ", to old FecGrp" << endl;
-          found->second->add(it->second);
+          auto found = (foundFe == mp.end()) ? foundIFec : foundFe;
+          bool inv = (foundFe == mp.end());
+          // cout << "Add " << it->second.gate()->getVar() << ", to old FecGrp" << endl;
+          found->second->add(it->second.gate(), inv);
         }
         it = ch.erase(it);
       }
-      else ++it;
-    }
-  }
-  // Checking IFEC Pairs
-  size = _IfecGrps.size();
-  for (size_t i = 0;i < size; ++i) {
-    FecGrp* IfecGrp = _IfecGrps[i];
-
-    map<size_t, FecGrp*> mp;  // simVal to fecGrp
-    map<size_t, CirGate*>& ch = IfecGrp->_child;
-
-    assert(!ch.empty());
-    size_t val = ch.begin()->second->getSimVal();
-    mp[val] = IfecGrp;
-
-    for (map<size_t, CirGate*>::iterator it = ++ch.begin(); it != ch.end();) {
-      size_t chVal = it->second->getSimVal();
-      if (~chVal != val) {
-        auto found = mp.find(~chVal);
-        if (found == mp.end()) {
-          // cout << "Add new IFecGrp for " << it->second->getVar() << endl;
-          FecGrp* newFecGrp = new FecGrp(it->second, 1);
-          _IfecGrps.push_back(newFecGrp);
-          mp[chVal] = _IfecGrps.back();
+      else {
+        if (~chVal == val) {
+          // cout << "IFEC: " << it->second.gate()->getVar() << endl;
+          it->second._inv = 1;
         }
-        else {
-          // cout << "Add " << it->second->getVar() << ", to old IFecGrp" << endl;
-          found->second->add(it->second, 1);
-        }
-        it = ch.erase(it);
+        ++it;
       }
-      else ++it;
     }
   }
-  // for(size_t i = 0;i < _fecGrps.size(); ++i) {
-  //   cout << "FecGroups " << i << ": ";
-  //   for (auto it : _fecGrps[i]->_child) {
-  //     cout << it.second->getVar() << " ";
-  //   }
-  //   cout << endl;
-  // }
 }
