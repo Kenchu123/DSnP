@@ -18,6 +18,7 @@ using namespace std;
 
 class CirGate;
 class CirMgr;
+class FecGrp;
 class SatSolver;
 
 enum GateType

@@ -143,5 +143,10 @@ CirGate::printSim() const {
 }
 
 void CirGate::printFECs() const {
-   cout << "= FECs:" << endl;
+   cout << "= FECs:";
+   if (!_fecGrp) { cout << endl; return; }
+   for (auto it = _fecGrp->_child.begin(); it != _fecGrp->_child.end(); ++it) {
+      if (it->second != this) cout << " " << it->second->getVar();
+   }
+   cout << endl;
 }

@@ -29,6 +29,7 @@ class CirAigGate;
 class CirGateV {
   public:
   friend class CirMgr;
+  friend class FecGrp;
   friend class CirGate;
   friend class CirPiGate;
   friend class CirPoGate;
@@ -104,6 +105,8 @@ public:
   bool sim();
   void printSim() const;
   void printFECs() const;
+  void setFecGrp(FecGrp* fec) { _fecGrp = fec; }
+  FecGrp* getFecGrp() { return _fecGrp; }
 
 private:
   static unsigned _globalRef;
@@ -123,6 +126,7 @@ protected:
   size_t _simVal;
   bool _valCh;
   bool _doSim;
+  FecGrp* _fecGrp;
 
   bool _inDFSlist;
 };
@@ -176,5 +180,6 @@ public:
   }
   ~CirAigGate() { reset(); }
 };
+
 
 #endif // CIR_GATE_H

@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -113,6 +114,31 @@ private:
   size_t _cnt, _logCnt;
   void _simPattern(vector<size_t>&);
   void _genLog(vector<size_t>&);
+  void _genfecGrp();
+  void _initfecGrp();
+  bool _initfec;
+  vector<FecGrp*> _fecGrps;
+//   map<string, size_t> _matchGrp; // match fecGrp to place in fecGrps
+};
+
+
+class FecGrp {
+public:
+   friend CirMgr;
+   friend CirGate;
+   FecGrp() {}
+   FecGrp(CirGate* g) {
+      _child[g->getVar()] = g;
+      g->setFecGrp(this);
+   }
+   void add(CirGate* g) {
+      _child[g->getVar()] = g;
+      g->setFecGrp(this);
+   }
+
+private:
+   map<size_t, CirGate*> _child; // fec group child
+
 };
 
 #endif // CIR_MGR_H
