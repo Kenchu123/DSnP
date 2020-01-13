@@ -124,10 +124,13 @@ void CirMgr::_initfecGrp() {
   assert(_initfec == 0);
   _initfec = 1;
   FecGrp* newFecGrp = new FecGrp(Const0);
+  FecGrp* InewFecGrp = new FecGrp(Const0, 1);
   _fecGrps.push_back(newFecGrp);
+  _IfecGrps.push_back(InewFecGrp);
   for (auto& g: _dfslist) {
     if (g->getType() == AIG_GATE) {
       _fecGrps[0]->add(g);
+      _IfecGrps[0]->add(g, 1);
     }
   }
   // cout << "Initial Fec Group: ";
@@ -153,7 +156,6 @@ void CirMgr::_genfecGrp() {
 
     for (map<size_t, CirGate*>::iterator it = ch.begin(); it != ch.end();) {
       size_t chVal = it->second->getSimVal();
-      // cout << "Checking: " << it->second->getVar() << ", to: " << ch.begin()->second->getVar() << endl;
       if (chVal != val) {
         auto found = mp.find(chVal);
         if (found == mp.end()) {
@@ -165,6 +167,37 @@ void CirMgr::_genfecGrp() {
         else {
           // cout << "Add " << it->second->getVar() << ", to old FecGrp" << endl;
           found->second->add(it->second);
+        }
+        it = ch.erase(it);
+      }
+      else ++it;
+    }
+  }
+  // Checking IFEC Pairs
+  size = _IfecGrps.size();
+  for (size_t i = 0;i < size; ++i) {
+    FecGrp* IfecGrp = _IfecGrps[i];
+
+    map<size_t, FecGrp*> mp;  // simVal to fecGrp
+    map<size_t, CirGate*>& ch = IfecGrp->_child;
+
+    assert(!ch.empty());
+    size_t val = ch.begin()->second->getSimVal();
+    mp[val] = IfecGrp;
+
+    for (map<size_t, CirGate*>::iterator it = ++ch.begin(); it != ch.end();) {
+      size_t chVal = it->second->getSimVal();
+      if (~chVal != val) {
+        auto found = mp.find(~chVal);
+        if (found == mp.end()) {
+          // cout << "Add new IFecGrp for " << it->second->getVar() << endl;
+          FecGrp* newFecGrp = new FecGrp(it->second, 1);
+          _IfecGrps.push_back(newFecGrp);
+          mp[chVal] = _IfecGrps.back();
+        }
+        else {
+          // cout << "Add " << it->second->getVar() << ", to old IFecGrp" << endl;
+          found->second->add(it->second, 1);
         }
         it = ch.erase(it);
       }

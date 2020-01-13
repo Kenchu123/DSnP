@@ -118,7 +118,7 @@ private:
   void _initfecGrp();
   bool _initfec;
   vector<FecGrp*> _fecGrps;
-//   map<string, size_t> _matchGrp; // match fecGrp to place in fecGrps
+  vector<FecGrp*> _IfecGrps;
 };
 
 
@@ -127,18 +127,17 @@ public:
    friend CirMgr;
    friend CirGate;
    FecGrp() {}
-   FecGrp(CirGate* g) {
+   FecGrp(CirGate* g, bool inv = 0) {
       _child[g->getVar()] = g;
-      g->setFecGrp(this);
+      inv ? g->setIFecGrp(this) : g->setFecGrp(this);
    }
-   void add(CirGate* g) {
+   void add(CirGate* g, bool inv = 0) {
       _child[g->getVar()] = g;
-      g->setFecGrp(this);
+      inv ? g->setIFecGrp(this) : g->setFecGrp(this);
    }
 
 private:
    map<size_t, CirGate*> _child; // fec group child
-
 };
 
 #endif // CIR_MGR_H

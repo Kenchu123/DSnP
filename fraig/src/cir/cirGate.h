@@ -106,7 +106,9 @@ public:
   void printSim() const;
   void printFECs() const;
   void setFecGrp(FecGrp* fec) { _fecGrp = fec; }
+  void setIFecGrp(FecGrp* fec) { _IfecGrp = fec; }
   FecGrp* getFecGrp() { return _fecGrp; }
+  FecGrp* getIFecGrp() { return _IfecGrp; }
 
 private:
   static unsigned _globalRef;
@@ -127,6 +129,7 @@ protected:
   bool _valCh;
   bool _doSim;
   FecGrp* _fecGrp;
+  FecGrp* _IfecGrp;
 
   bool _inDFSlist;
 };
