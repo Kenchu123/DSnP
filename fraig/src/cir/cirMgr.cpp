@@ -586,6 +586,7 @@ CirMgr::_buildConnect() {
 
 void
 CirMgr::genDFSList() {
+   _dfslist.clear();
    CirGate::setGlobalRef();
    for (size_t i = 0;i < _polist.size(); ++i) _dfs(_polist[i]);
 }
@@ -615,8 +616,8 @@ CirMgr::reset() {
    _doComment = 0;
    _comment = _type = "";
 
-   satCnt = 0;
-   unSatCnt = 0;
+   _satCnt = 0;
+   _unSatCnt = 0;
 
    lineNo = 0;
    colNo = 0;

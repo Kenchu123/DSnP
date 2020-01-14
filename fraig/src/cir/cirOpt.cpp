@@ -73,7 +73,7 @@ CirMgr::optimize()
         _replaceGateTo(g, CirGateV(Const0, 0));
     }
   }
-  _dfslist.clear();
+  // _dfslist.clear();
   genDFSList();
 }
 

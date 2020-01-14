@@ -109,7 +109,7 @@ private:
 
   // strash
   unsigned long long _hashFanin(CirGate*);
-  void _mergeGate(CirGate*, CirGate*);
+  void _mergeGate(CirGate*, CirGate*, bool inv = 0);
 
   // simulate
   size_t _cnt, _logCnt;
@@ -123,9 +123,12 @@ private:
 
   // fraig
   void _genProofModel(SatSolver&);
-  void _fraigFec(FecGrp*&, SatSolver&);
+  bool _fraigFec(FecGrp*&, SatSolver&);
   void reportResult(const SatSolver&, bool&);
-  size_t satCnt, unSatCnt;
+  void _collectPattern(const SatSolver&);
+  void _mergeFecGrp(FecGrp*&);
+  vector<size_t> _pat;
+  size_t _satCnt, _unSatCnt;
 };
 
 
