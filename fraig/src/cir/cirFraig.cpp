@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <math.h>
 #include <bitset>
+#include <queue>
 #include "cirMgr.h"
 #include "cirGate.h"
 #include "sat.h"
@@ -50,10 +51,8 @@ CirMgr::strash()
     else {
       cout << "Strashing: " << found->second->getVar() << " merging " << g->getVar() << "..." << endl;
       _mergeGate(found->second, g);
-      // _removeGate(g->getVar());
     }
   }
-  // _dfslist.clear();
   genDFSList();
 }
 
@@ -64,33 +63,35 @@ CirMgr::fraig()
    solver.initialize();
    _genProofModel(solver);
 
-  while (!_fecGrps.empty()) {
-    cout << "fraig()#68: " << _fecGrps.size() << endl;
-    bool reGenDfs = 0;
-    for (auto& fg : _fecGrps) fg->_isFraig = 0; // reset isFraig
-    for (auto& g : _dfslist) {
-      cout << "fraig()#72" << endl;
-      FecGrp* fg = g->_fecGrp;
-      if (fg == 0) continue;
-      assert(fg != 0);
-      reGenDfs = _fraigFec(fg, solver);
-      if (reGenDfs) break;
-    }
-    if (reGenDfs) genDFSList();
-
-    // For Debug
-    if (_fecGrps.size() == 1) {
-      printFECPairs();
-      break;
-    }
-    if (_pat.size() == _I) {
-      cout << "Simulating #87" << endl;
-      _simPattern(_pat);
-      _genfecGrp();
-    }
+  queue<unsigned> fgQue;
+  for (size_t i = 0, n = _pilist.size(); i < n; ++i) {
+    if (_pilist[i]->_inDFSlist)
+      fgQue.push(_pilist[i]->_var);
   }
-  // strash();
+  while (!fgQue.empty()) {
+    if (_fecGrps.empty()) break;
+    unsigned gateVar = fgQue.front();
+    fgQue.pop();
+    auto found = _gatelist.find(gateVar);
 
+    CirGate* g = 0;
+    if (found == _gatelist.end()) { continue; }
+    else g = found->second;
+    if (g == 0) { fgQue.pop(); continue; }
+    assert(g != 0);
+    // push g's fanout to queueu (BFS)
+    for (auto outV : g->_fanout) {
+      if (outV._gate->_inDFSlist)
+        fgQue.push(outV._gate->_var);
+    }
+    if (g->_fecGrp == 0) { continue; }
+    
+    assert(g->_fecGrp != 0);
+    // cout << "Running " << g->_var << "'s fecGrp" << endl;
+    if (!_fraigFec(g->_fecGrp, solver)) fgQue.push(g->_var);
+  }
+  strash();
+  _initfec = false;
 }
 
 /********************************************/
@@ -158,29 +159,33 @@ void CirMgr::reportResult(const SatSolver& solver, bool& result)
 {
   //  solver.printStats();
    cout << (result? "SAT" : "UNSAT") << endl;
-  //  if (result) {
-  //     for (size_t i = 0, n = _dfslist.size(); i < n; ++i)
-  //        cout << _dfslist[i]->getVar() << " " << solver.getValue(_dfslist[i]->getSatVar()) << ", ";
-  //  }
-  //  cout << endl;
 }
 
-bool CirMgr::_fraigFec(FecGrp*& fg, SatSolver& solver) {
-  cout << "_fraigFEC#163: " << endl;
-  if (fg->_isFraig) return false;
+bool CirMgr::_fraigFec(FecGrp* fg, SatSolver& solver) {
+  // cout << "_fraigFEC#163: " << endl;
+  if (fg->_isFraig) {
+    // cout << "Merging this group!!" << endl;
+    _mergeFecGrp(fg);
+    genDFSList();
+    cout << "Updating by UNSAT...Total #FEC Group = " << _fecGrps.size() << endl;
+    return true;
+  }
 
   unsigned A = fg->_child.begin()->second._gate->getVar();
   const Var& va = fg->_child.begin()->second._gate->getSatVar();
   bool fa = fg->_child.begin()->second._inv;
 
-  bool allUnSat = 1, doSim = 0;
+  bool doOnlySim = 0;
+  _satCnt = 0;
+  // size_t satLimit = fg->_child.size() / 2 < 63 ? fg->_child.size() : 63;
+  size_t satLimit = 62;
   for (auto it = ++fg->_child.begin(), itl = fg->_child.end(); it != itl; ++it) {
     bool re;
     const Var& vb = it->second._gate->getSatVar();
     unsigned B = it->second._gate->getVar();
     bool fb = it->second._inv; 
 
-    cout << "#178Proving..." << "(" << (fa ? "!" : "") << A << "," << (fb ? "!" : "") << B <<  ")" << endl;
+    // cout << "Proving..." << "(" << (fa ? "!" : "") << A << "," << (fb ? "!" : "") << B <<  ")" << endl;
     Var newV = solver.newVar();
     solver.addXorCNF(newV, va, fa, vb, fb);
     solver.assumeRelease();
@@ -189,60 +194,58 @@ bool CirMgr::_fraigFec(FecGrp*& fg, SatSolver& solver) {
     // reportResult(solver, re);
 
     if (re) { // SAT
-      cout << "Find a SAT, SatCnt = " << _satCnt << endl;
-      allUnSat = 0;
+      // cout << "Find a SAT, SatCnt = " << _satCnt << endl;
       // Collect Pattern
       _collectPattern(solver);
       ++_satCnt;
-      if (_satCnt == 64) {
-        doSim = 1;
-        _satCnt = 0;
+      if (_satCnt == satLimit) {
+        doOnlySim = 1;
         break;
       }
     }
-    else cout << "UNSAT" << endl;
+    // else cout << "UNSAT" << endl;
   }
-
-  if (allUnSat) { // Merge this fgGrp
-    cout << "Merging this group!!" << endl;
-    _mergeFecGrp(fg);
-    // genDFSList();
-    cout << "Updating by UNSAT...#Total FEC Group = " << _fecGrps.size() << endl;
-    return true;
-  }
-  if (doSim) { // sim with new pattern
-    cout << "Simulate with new pattern!!" << endl;
-    for (size_t i = 0; i < _pat.size(); ++i) cout << _pat[i] << " ";
-    cout << endl;
+  if (_satCnt != 0) {
+    // cout << "Simulate with new pattern!!" << endl;
     _simPattern(_pat);
+    if (!doOnlySim) fg->_isFraig = 1;
     _genfecGrp();
     _pat.clear();
-    cout << "Updating by SAT...#Total FEC Group = " << _fecGrps.size() << endl;
+    _satCnt = 0;
+    cout << "Updating by SAT...Total #FEC Group = " << _fecGrps.size() << endl;
     return false;
   }
 
-  if (!allUnSat) fg->_isFraig = true;
+  if (_satCnt == 0) { // Merge this fgGrp
+    // cout << "Merging this group!!" << endl;
+    _mergeFecGrp(fg);
+    genDFSList();
+    cout << "Updating by UNSAT...Total #FEC Group = " << _fecGrps.size() << endl;
+    return true;
+  }
+
   return false;
 }
 
 void CirMgr::_collectPattern(const SatSolver& solver) {
-  cout << "collectattern#209" << endl;
+  // cout << "collectattern#209" << endl;
   if (_pat.empty()) for (size_t i = 0;i < _I; ++i) _pat.push_back(0);
   assert(_pat.size() == _I);
   for (size_t i = 0;i < _I; ++i) {
     // cout << _pat[i] << " ";
     _pat[i] |= ((size_t)solver.getValue(_pilist[i]->_satVar) << _satCnt);
   }
-  cout << "Check Const Value: " << solver.getValue(Const0->_satVar) << endl;
+  // cout << "Check Const Value: " << solver.getValue(Const0->_satVar) << endl;
   // cout << endl;
 }
 
 void CirMgr::_mergeFecGrp(FecGrp*& fg) {
+  if (fg == 0) return;
   assert(fg != 0);
   CirGate* base = fg->_child.begin()->second._gate;
   for (auto it = ++fg->_child.begin(); it != fg->_child.end();) {
-    cout << "Fraig: " << base->_var << " merging... "<< (it->second._inv ? "!" : "") << it->second._gate->_var << endl;
-    // it->second._gate->setFecGrp(0);
+    cout << "Fraig: " << base->_var << " merging "<< (it->second._inv ? "!" : "") << it->second._gate->_var << "..." << endl;
+    it->second._gate->setFecGrp(0);
     _mergeGate(base, it->second._gate, it->second._inv);
     it = fg->_child.erase(it);
   }
@@ -251,7 +254,7 @@ void CirMgr::_mergeFecGrp(FecGrp*& fg) {
 
   for (size_t i = 0;i < _fecGrps.size(); ++i) {
     if (_fecGrps[i] == fg) {
-      cout << "Erasing fg from _fecGrps" << endl;
+      // cout << "Erasing fg from _fecGrps" << endl;
       _fecGrps.erase(_fecGrps.begin() + i); break;
     }
   }

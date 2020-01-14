@@ -123,7 +123,7 @@ private:
 
   // fraig
   void _genProofModel(SatSolver&);
-  bool _fraigFec(FecGrp*&, SatSolver&);
+  bool _fraigFec(FecGrp*, SatSolver&);
   void reportResult(const SatSolver&, bool&);
   void _collectPattern(const SatSolver&);
   void _mergeFecGrp(FecGrp*&);
