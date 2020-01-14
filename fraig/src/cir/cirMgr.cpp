@@ -517,9 +517,24 @@ CirMgr::printFloatGates() const
    }
 }
 
+bool CirMgr::_sortFecGrp(FecGrp*& f, FecGrp*& s) {
+   size_t varf = f->_child.begin()->second.gate()->getVar();
+   size_t vars = s->_child.begin()->second.gate()->getVar();
+   return varf < vars;
+}
+
 void
-CirMgr::printFECPairs() const
+CirMgr::printFECPairs()
 {
+   // sort _fecGrps
+   sort(_fecGrps.begin(), _fecGrps.end(), CirMgr::_sortFecGrp);
+   for (size_t i = 0;i < _fecGrps.size(); ++i) {
+      cout << "[" << i << "]";
+      for (auto it = _fecGrps[i]->_child.begin(); it != _fecGrps[i]->_child.end(); ++it) {
+         cout << " " << (it->second._inv ? "!" : "") << it->second._gate->_var;
+      }
+      cout << endl;
+   }
 }
 
 void
@@ -599,6 +614,9 @@ CirMgr::reset() {
    _M = _I = _L = _O = _A = 0;
    _doComment = 0;
    _comment = _type = "";
+
+   satCnt = 0;
+   unSatCnt = 0;
 
    lineNo = 0;
    colNo = 0;

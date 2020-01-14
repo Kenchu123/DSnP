@@ -117,6 +117,10 @@ public:
     _valCh = 0;
     _doSim = 0;
   }
+
+  Var getSatVar() const { return _satVar; }
+  void setVar(const Var& v) { _satVar = v; }
+
 private:
   static unsigned _globalRef;
   unsigned _ref;
@@ -138,6 +142,8 @@ protected:
   FecGrp* _fecGrp;
 
   bool _inDFSlist;
+
+  Var _satVar;
 };
 
 class CirPiGate : public CirGate

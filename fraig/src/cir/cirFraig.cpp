@@ -58,6 +58,17 @@ CirMgr::strash()
 void
 CirMgr::fraig()
 {
+   SatSolver solver;
+   solver.initialize();
+   _genProofModel(solver);
+
+   for (auto& g : _dfslist) {
+     FecGrp* fg = g->_fecGrp;
+     if (fg == 0) continue;
+     assert(fg != 0);
+     _fraigFec(fg, solver);
+   }
+
 }
 
 /********************************************/
@@ -85,4 +96,64 @@ void CirMgr::_mergeGate(CirGate* A, CirGate* B) {
     }
   }
   _removeGate(B->getVar());
+}
+
+void CirMgr::_genProofModel(SatSolver& s) {
+  cout << "Generating Proof Model" << endl;
+  for (auto& g : _dfslist) {
+    switch (g->getType()) {
+      case PI_GATE:
+      case AIG_GATE:
+      case CONST_GATE:
+      case UNDEF_GATE:
+        Var v = s.newVar(); g->setVar(v); break;
+    }
+
+    if (g->getType() == AIG_GATE) {
+      assert(g->_fanin.size() == 2);
+      Var& vf = g->_satVar,
+          va = g->_fanin[0]._gate->_satVar,
+          vb = g->_fanin[1]._gate->_satVar;
+      bool fa = g->_fanin[0]._inv,
+           fb = g->_fanin[1]._inv;
+      s.addAigCNF(vf, va, fa, vb, fb);
+    }
+  }
+}
+
+void CirMgr::reportResult(const SatSolver& solver, bool& result)
+{
+  //  solver.printStats();
+   cout << (result? "SAT" : "UNSAT") << endl;
+  //  if (result) {
+  //     for (size_t i = 0, n = _dfslist.size(); i < n; ++i)
+  //        cout << _dfslist[i]->getVar() << " " << solver.getValue(_dfslist[i]->getSatVar()) << ", ";
+  //  }
+  //  cout << endl;
+}
+
+void CirMgr::_fraigFec(FecGrp*& fg, SatSolver& solver) {
+  if (fg->_isFraig) return;
+
+  unsigned A = fg->_child.begin()->second._gate->getVar();
+  const Var& va = fg->_child.begin()->second._gate->getSatVar();
+  bool fa = fg->_child.begin()->second._inv;
+
+  for (auto it = ++fg->_child.begin(), itl = fg->_child.end(); it != itl; ++it) {
+    bool re;
+    const Var& vb = it->second._gate->getSatVar();
+    unsigned B = it->second._gate->getVar();
+    bool fb = it->second._inv; 
+
+    cout << "Sat..." << "(" << (fa ? "!" : "") << A << "," << (fb ? "!" : "") << B <<  ")" << endl;
+    Var newV = solver.newVar();
+    solver.addXorCNF(newV, va, fa, vb, fb);
+    solver.assumeRelease();
+    solver.assumeProperty(newV, true);
+    re = solver.assumpSolve();
+    reportResult(solver, re);
+  }
+  
+  fg->_isFraig = true;
+  
 }

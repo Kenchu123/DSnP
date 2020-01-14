@@ -15,6 +15,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include "sat.h"
 
 using namespace std;
 
@@ -62,7 +63,7 @@ public:
    void printPIs() const;
    void printPOs() const;
    void printFloatGates() const;
-   void printFECPairs() const;
+   void printFECPairs();
    void writeAag(ostream&) const;
    void writeGate(ostream&, CirGate*) const;
 
@@ -116,8 +117,15 @@ private:
   void _genLog(vector<size_t>&);
   void _genfecGrp();
   void _initfecGrp();
+  static bool _sortFecGrp(FecGrp*&, FecGrp*&);
   bool _initfec;
   vector<FecGrp*> _fecGrps;
+
+  // fraig
+  void _genProofModel(SatSolver&);
+  void _fraigFec(FecGrp*&, SatSolver&);
+  void reportResult(const SatSolver&, bool&);
+  size_t satCnt, unSatCnt;
 };
 
 
@@ -135,12 +143,14 @@ public:
       g->setFecGrp(this);
    }
    ~FecGrp() {
+      _isFraig = 0;
       for (auto it = _child.begin(); it != _child.end(); ++it) 
          it->second.gate()->setFecGrp(0);
       _child.clear();
    }
 
 private:
+   bool _isFraig = 0;
    map<size_t, CirGateV> _child; // fec group child
 };
 

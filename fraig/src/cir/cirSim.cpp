@@ -49,7 +49,6 @@ CirMgr::fileSim(ifstream& patternFile)
   vector<size_t> vec; vec.resize(_I);
   while (patternFile >> pattern) {
     if (pattern.size() == 0) break;
-
     if (pattern.size() != _I) {
       cerr << "Error: Pattern(" << pattern << ") length(" << pattern.size()\
         << ") does not match the number of inputs(" << _I << ") in a circuit!!" << endl;
@@ -63,6 +62,7 @@ CirMgr::fileSim(ifstream& patternFile)
       }
       if (pattern[i] == '1') vec[i] |= ((size_t)1 << (_cnt % 64));
     }
+
     ++_cnt;
     if (_cnt % 64 == 0) {
       _simPattern(vec);
@@ -78,7 +78,7 @@ CirMgr::fileSim(ifstream& patternFile)
   }
   vec.clear();
   cout << _cnt << " patterns simulated." << endl;
-  cout << "Total #FEC Group = " << _fecGrps.size() << endl;
+  // cout << "Total #FEC Group = " << _fecGrps.size() << endl;
 }
 
 /*************************************************/
@@ -131,7 +131,6 @@ void CirMgr::_initfecGrp() {
   //     cout << it->second._gate->getVar() << " ";
   //   }
   //   cout << endl;
-  // }
 }
 
 void CirMgr::_genfecGrp() {
@@ -139,6 +138,7 @@ void CirMgr::_genfecGrp() {
   size_t size = _fecGrps.size();
   auto grpIt = _fecGrps.begin();
   for (size_t i = 0;i < size; ++i) {
+    
     FecGrp* fecGrp = _fecGrps[i];
     // FecGrp* fecGrp = *grpIt;
 
@@ -152,13 +152,14 @@ void CirMgr::_genfecGrp() {
 
     for (map<size_t, CirGateV>::iterator it = ++ch.begin(); it != ch.end();) {
       size_t chVal = it->second._gate->_simVal;
+      if (it->second._inv) chVal = ~chVal; // IFec
 
       if (chVal != val && ~chVal != val) {
         auto foundFe = mp.find(chVal);
         auto foundIFec = mp.find(~chVal);
         if (foundFe == mp.end() && foundIFec == mp.end()) {
           // cout << "Add new FecGrp for " << it->second._gate->getVar() << endl;
-          FecGrp* newFecGrp = new FecGrp(it->second._gate, it->second._inv);
+          FecGrp* newFecGrp = new FecGrp(it->second._gate, 0);
           // _fecGrps.push_back(newFecGrp);
           mp[chVal] = newFecGrp;
         }
