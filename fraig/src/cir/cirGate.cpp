@@ -117,7 +117,6 @@ CirGate::reset() {
    _simVal = 0;
    _valCh = 0;
    _doSim = 0;
-   // _inDFSlist = 0;
 }
 
 bool

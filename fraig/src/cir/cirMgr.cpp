@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <ctype.h>
 #include <cassert>
+#include <unordered_set>
 #include <cstring>
 #include "cirMgr.h"
 #include "cirGate.h"
@@ -571,8 +572,52 @@ CirMgr::writeAag(ostream& outfile) const
 }
 
 void
-CirMgr::writeGate(ostream& outfile, CirGate *g) const
+CirMgr::_gateDfs(CirGate* gate) {
+   gate->setToGlobalRef();
+   for (size_t i = 0;i < gate->_fanin.size(); ++i) {
+      if (!gate->_fanin[i].gate()->isGlobalRef()) {
+         _gateDfs(gate->_fanin[i].gate());
+      }
+   }
+   if (gate->_gateType != UNDEF_GATE) {
+      _gdfslist.push_back(gate);
+   }
+}
+
+void
+CirMgr::writeGate(ostream& outfile, CirGate *g) 
 {
+   unsigned M = 0, I = 0, L = 0, O = 1, A = 0;
+   unordered_set<CirGate*> pi, po;
+   pi.clear(); po.clear(); _gdfslist.clear();
+   CirGate::setGlobalRef();
+   _gateDfs(g);
+   // count AIG in _dfslist
+   for (auto i : _gdfslist) {
+      if (i->_gateType == AIG_GATE) ++A;
+      if (i->_gateType == PI_GATE) { ++I; pi.insert(i); }
+      if (i->_gateType == PO_GATE) po.insert(i);
+   }
+   outfile << "aag " << g->_var << " " << I << " " << L << " " << O << " " << A << endl;
+
+   for (auto i : _pilist) if (pi.count(i)) outfile << i->_var * 2 << endl;
+   outfile << g->_var * 2 << endl;
+   for (auto i : _gdfslist) {
+      if (i->_gateType == AIG_GATE) {
+         outfile << i->_var * 2;
+         for (size_t j = 0;j < i->_fanin.size(); ++j) {
+            outfile << " " << i->_fanin[j].gate()->_var * 2 + int(i->_fanin[j].inv());
+         }
+         outfile << endl;
+      }
+   }
+   unsigned cnt = 0;
+   for (size_t i = 0;i < _pilist.size(); ++i) {
+      if (pi.count(_pilist[i]) && _pilist[i]->_symbo.size()) outfile << "i" << cnt++ << " " << _pilist[i]->_symbo << endl;
+   }
+   outfile << "o0 " << g->_var << endl;
+   string myComment = "Write Gate (" + to_string(g->_var) + ") output by Che-Kuang (Ken) Chu";
+   outfile << "c\n" << myComment << endl;
 }
 
 void
@@ -614,15 +659,15 @@ CirMgr::reset() {
    _aiglist.clear();
    _dfslist.clear();
    _dfsSet.clear();
-   _fecToMerge.clear();
 
    _M = _I = _L = _O = _A = 0;
    _doComment = 0;
    _comment = _type = "";
 
    _satCnt = 0;
-   _unSatCnt = 0;
-   _completeSim = 0;
+   _duPat.clear();
+   _pat.clear();
+   _fecToMerge.clear();
 
    lineNo = 0;
    colNo = 0;

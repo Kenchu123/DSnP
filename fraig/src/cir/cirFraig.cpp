@@ -66,6 +66,7 @@ CirMgr::fraig()
 
   queue<unsigned> fgQue;
   unordered_set<unsigned> inQue;
+  _satCnt = 0;
   
   _fecToMerge.clear();
   for (size_t i = 0, n = _pilist.size(); i < n; ++i) {
@@ -97,7 +98,7 @@ CirMgr::fraig()
     if (g->_fecGrp == 0) { continue; }
     
     assert(g->_fecGrp != 0);
-    cout << "Running " << g->_var << "'s fecGrp" << endl;
+    // cout << "Running " << g->_var << "'s fecGrp" << endl;
     if (_fecToMerge.count(g->_fecGrp)) { continue; }
     if (!_fraigFec(g->_fecGrp, solver)) {
       fgQue.push(g->_var);
@@ -109,7 +110,10 @@ CirMgr::fraig()
     _genfecGrp();
     _pat.clear();
     _satCnt = 0;
-    cout << "Updating by SAT...Total #FEC Group = " << _fecGrps.size() << endl;
+    cout << "Updating by SAT... Total #FEC Group = " << _fecGrps.size() << endl;
+  }
+  if (!_fecGrps.empty()) {
+    for (auto fg : _fecGrps) _fecToMerge.insert(fg);
   }
   if (!_fecToMerge.empty()) {
     for (auto fg = _fecToMerge.begin(); fg != _fecToMerge.end(); ++fg) {
@@ -118,6 +122,7 @@ CirMgr::fraig()
     genDFSList();
   }
   _fecToMerge.clear();
+  
   strash();
   _initfec = false;
 }
@@ -154,7 +159,7 @@ void CirMgr::_mergeGate(CirGate* A, CirGate* B, bool inv) {
 
 void CirMgr::_genProofModel(SatSolver& s) {
   s.reset();
-  cout << "Generating Proof Model" << endl;
+  // cout << "Generating Proof Model" << endl;
   Var  vf = s.newVar();
   Const0->setVar(vf);
   Var  va = s.newVar();
@@ -193,7 +198,7 @@ bool CirMgr::_fraigFec(FecGrp* fg, SatSolver& solver) {
   bool doSim = 0;
   bool allUnSat = 1;
 
-  size_t satLimit = 63;
+  size_t satLimit = 64;
   for (auto it = ++fg->_child.begin(), itl = fg->_child.end(); it != itl; ++it) {
     bool re;
     const Var& vb = it->second._gate->getSatVar();
@@ -208,11 +213,10 @@ bool CirMgr::_fraigFec(FecGrp* fg, SatSolver& solver) {
     re = solver.assumpSolve();
 
     if (re) { // SAT
-      cout << "Find a SAT, SatCnt = " << _satCnt << endl;
+      // cout << "Find a SAT, SatCnt = " << _satCnt << endl;
       allUnSat = 0;
       // Collect Pattern
       _collectPattern(solver);
-      ++_satCnt;
       if (_satCnt == satLimit) {
         doSim = 1;
         break;
@@ -226,7 +230,8 @@ bool CirMgr::_fraigFec(FecGrp* fg, SatSolver& solver) {
     _genfecGrp();
     _pat.clear();
     _satCnt = 0;
-    cout << "Updating by SAT...Total #FEC Group = " << _fecGrps.size() << endl;
+    _duPat.clear();
+    cout << "Updating by SAT... Total #FEC Group = " << _fecGrps.size() << endl;
 
     // merge fecGrp that is Fraig
     for (auto it = _fecToMerge.begin(), itl = _fecToMerge.end(); it != itl; ++it) {
@@ -249,12 +254,27 @@ bool CirMgr::_fraigFec(FecGrp* fg, SatSolver& solver) {
 }
 
 void CirMgr::_collectPattern(const SatSolver& solver) {
+  string patS = "";
   if (_pat.empty()) for (size_t i = 0;i < _I; ++i) _pat.push_back(0);
+
   assert(_pat.size() == _I);
-  for (size_t i = 0;i < _I; ++i) {
-    _pat[i] |= ((size_t)solver.getValue(_pilist[i]->_satVar) << _satCnt);
+  for (auto& g : _pilist) {
+    size_t re = solver.getValue(g->_satVar);
+    patS += (re == 0 ? "0" : "1");
+  }
+  // cout << "Get Pattern: " << patS << endl;
+  if (_duPat.count(patS) == 0) { // no duplicate
+    // cout << "it's a new Pattern: ";
+    for (size_t i = 0;i < _I; ++i) {
+      if (patS[i] == '1') _pat[i] |= ((size_t)1 << _satCnt);
+      // cout << _pat[i] << " ";
+    }
+    // cout << endl;
+    _duPat.insert(patS);
+    ++_satCnt;
   }
   // cout << "Check Const Value: " << solver.getValue(Const0->_satVar) << endl;
+  return;
 }
 
 void CirMgr::_mergeFecGrp(FecGrp* fg) {
@@ -278,5 +298,5 @@ void CirMgr::_mergeFecGrp(FecGrp* fg) {
   }
   delete fg;
   fg = 0;
-  cout << "Updating by UNSAT...Total #FEC Group = " << _fecGrps.size() << endl;
+  cout << "Updating by UNSAT... Total #FEC Group = " << _fecGrps.size() << endl;
 }

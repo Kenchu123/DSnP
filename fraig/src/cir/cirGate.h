@@ -72,7 +72,7 @@ public:
     }
   }
   unsigned getLineNo() const { return _lineNo; }
-  virtual bool isAig() const { return false; }
+  virtual bool isAig() const { return _gateType == AIG_GATE; }
 
   // Printing functions
   // virtual void printGate() const = 0;
@@ -111,7 +111,6 @@ public:
   FecGrp* getFecGrp() { return _fecGrp; }
 
   void _gateInit() {
-    _inDFSlist = false;
     _fecGrp = 0;
     _simVal = 0;
     _valCh = 0;
@@ -140,8 +139,6 @@ protected:
   bool _valCh;
   bool _doSim;
   FecGrp* _fecGrp;
-
-  bool _inDFSlist;
 
   Var _satVar;
 };
