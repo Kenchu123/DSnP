@@ -35,7 +35,8 @@ CirMgr::sweep()
 {
   for (map<unsigned, CirGate*>::iterator it = _gatelist.begin(); it != _gatelist.end();) {
     // cout << it->second->getVar() << " " << it->second->_inDFSlist << " " << it->second->getTypeStr() << endl;
-    if (!it->second->_inDFSlist && (it->second->getType() == AIG_GATE || it->second->getType() == UNDEF_GATE)) {
+    if (_dfsSet.find(it->second->_var) == _dfsSet.end() \
+       && (it->second->getType() == AIG_GATE || it->second->getType() == UNDEF_GATE)) {
       cout << "Sweeping: " << it->second->getTypeStr() << "(" << it->second->getVar() << ") removed..." << endl;
       _removeGate(it->second->getVar(), &it);
     }

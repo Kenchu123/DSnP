@@ -586,6 +586,7 @@ CirMgr::_buildConnect() {
 
 void
 CirMgr::genDFSList() {
+   _dfsSet.clear();
    _dfslist.clear();
    CirGate::setGlobalRef();
    for (size_t i = 0;i < _polist.size(); ++i) _dfs(_polist[i]);
@@ -602,7 +603,8 @@ CirMgr::_dfs(CirGate* gate) {
    if (gate->_gateType != UNDEF_GATE) {
       _dfslist.push_back(gate);
    }
-   gate->_inDFSlist = true;
+   // gate->_inDFSlist = true;
+   _dfsSet.insert(gate->_var);
 }
 
 void
@@ -611,6 +613,8 @@ CirMgr::reset() {
    _polist.clear();
    _aiglist.clear();
    _dfslist.clear();
+   _dfsSet.clear();
+   _fecToMerge.clear();
 
    _M = _I = _L = _O = _A = 0;
    _doComment = 0;
@@ -618,6 +622,7 @@ CirMgr::reset() {
 
    _satCnt = 0;
    _unSatCnt = 0;
+   _completeSim = 0;
 
    lineNo = 0;
    colNo = 0;

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <unordered_set>
 #include "sat.h"
 
 using namespace std;
@@ -69,6 +70,7 @@ public:
 
    // Member functions about circuit DFS
    void genDFSList();
+   unordered_set<unsigned> _dfsSet;
 
    // CONST 0 gate
    static CirGate* Const0;
@@ -124,11 +126,12 @@ private:
   // fraig
   void _genProofModel(SatSolver&);
   bool _fraigFec(FecGrp*, SatSolver&);
-  void reportResult(const SatSolver&, bool&);
   void _collectPattern(const SatSolver&);
-  void _mergeFecGrp(FecGrp*&);
+  void _mergeFecGrp(FecGrp*);
   vector<size_t> _pat;
   size_t _satCnt, _unSatCnt;
+  bool _completeSim;
+  unordered_set<FecGrp*> _fecToMerge;
 };
 
 

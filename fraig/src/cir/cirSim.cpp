@@ -12,6 +12,10 @@
 #include <algorithm>
 #include <cassert>
 #include <bitset>
+#include <stdlib.h>
+#include <time.h>
+#include <chrono>
+#include <random>
 #include "cirMgr.h"
 #include "cirGate.h"
 #include "util.h"
@@ -34,10 +38,36 @@ using namespace std;
 /************************************************/
 /*   Public member functions about Simulation   */
 /************************************************/
+void randomPat(vector<size_t>& vec, size_t _I) {
+  vec.clear();
+  // srand(time(NULL));
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  minstd_rand0 generator (seed);
+  for (size_t i = 0;i < _I; ++i) {
+    size_t a = generator(), b = generator();
+    vec.push_back(((size_t)a << 32 | b));
+  }
+}
+
 void
 CirMgr::randomSim()
 {
-  if (!_initfec) _initfecGrp();
+  // generate random pattern
+  vector<size_t> vec;
+  size_t fecGrpCnts = _fecGrps.size(), fails = 0;
+  const size_t mxFail = 30;
+  _cnt = 0;
+  while (fails < mxFail) {
+    randomPat(vec, _I);
+    _simPattern(vec);
+    _genfecGrp();
+    _genLog(vec);
+    if (_fecGrps.size() != fecGrpCnts) fecGrpCnts = _fecGrps.size();
+    else ++fails;
+    _cnt += PATTERN_SIZE;
+  }
+  cout << _cnt << " patterns simulated." << endl;
+  cout << "Total #FEC Group = " << _fecGrps.size() << endl;
 }
 
 void
@@ -91,7 +121,7 @@ void CirMgr::_simPattern(vector<size_t>& pattern) {
   for (size_t i = 0;i < pattern.size(); ++i) {
     _pilist[i]->setSimVal(pattern[i]);
   }
-  // cout << "Simulating with pattern: ";
+  // // cout << "Simulating with pattern: ";
   // for (auto& g : _pilist) {
   //   cout << g->_simVal << ", valCh: " << g->_valCh << " ";
   // }
@@ -199,6 +229,7 @@ void CirMgr::_genfecGrp() {
   size_t cnt = 0;
   for (vector<FecGrp*>::iterator fg = _fecGrps.begin(); fg != _fecGrps.end() && cnt < size; ++cnt) {
     if ((*fg)->_child.size() <= 1) {
+      if (_fecToMerge.find(*fg) != _fecToMerge.end()) _fecToMerge.erase(*fg);
       delete (*fg);
       fg = _fecGrps.erase(fg);
     }
