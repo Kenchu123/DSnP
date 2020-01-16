@@ -78,14 +78,13 @@ CirMgr::fraig()
   while (!fgQue.empty()) {
     if (_fecGrps.empty()) break;
     unsigned gateVar = fgQue.front();
-    fgQue.pop();
-    inQue.erase(gateVar);
+    
 
     auto found = _gatelist.find(gateVar);
     CirGate* g = 0;
-    if (found == _gatelist.end()) { continue; }
+    if (found == _gatelist.end()) { fgQue.pop(); inQue.erase(gateVar); continue; }
     else g = found->second;
-    if (g == 0) { continue; }
+    if (g == 0) { fgQue.pop(); inQue.erase(gateVar); continue; }
     assert(g != 0);
     // push g's fanout to queueu (BFS)
     for (auto outV : g->_fanout) {
@@ -94,15 +93,16 @@ CirMgr::fraig()
         inQue.insert(outV._gate->_var);
       }
     }
-    if (g->_fecGrp == 0) { continue; }
+    if (g->_fecGrp == 0) { fgQue.pop(); inQue.erase(gateVar); continue; }
     
     assert(g->_fecGrp != 0);
     // cout << "Running " << g->_var << "'s fecGrp" << endl;
-    if (_fecToMerge.count(g->_fecGrp)) { continue; }
-    if (!_fraigFec(g->_fecGrp, solver)) {
-      fgQue.push(g->_var);
-      inQue.insert(g->_var);
-    }
+    if (_fecToMerge.count(g->_fecGrp)) { fgQue.pop(); inQue.erase(gateVar); continue; }
+    // if (!_fraigFec(g->_fecGrp, solver)) {
+      // fgQue.push(g->_var);
+      // inQue.insert(g->_var);
+    // }
+    if (_fraigFec(g->_fecGrp, solver)) fgQue.pop(); inQue.erase(gateVar);
   }
   if (_satCnt != 0) {
     _simPattern(_pat);
