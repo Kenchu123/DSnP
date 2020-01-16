@@ -85,7 +85,7 @@ CirMgr::fraig()
     CirGate* g = 0;
     if (found == _gatelist.end()) { continue; }
     else g = found->second;
-    if (g == 0) { fgQue.pop(); continue; }
+    if (g == 0) { continue; }
     assert(g != 0);
     // push g's fanout to queueu (BFS)
     for (auto outV : g->_fanout) {
