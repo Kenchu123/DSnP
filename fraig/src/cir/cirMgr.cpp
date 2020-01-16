@@ -271,12 +271,13 @@ CirMgr::_readPI(fstream& file) {
       if (lit / 2 > _M) return parseError(MAX_LIT_ID);
 
       CirPiGate* newPi = new CirPiGate(lit, lineNo + 1);
-      // for (auto g : _pilist) if (g->getVar() == lit / 2) {
-      //    errGate = g;
-      //    return parseError(REDEF_GATE);
-      // }
-      _pilist.push_back(newPi);
+      auto found = _gatelist.find(newPi->_var);
+      if (found != _gatelist.end()) {
+         errGate = found->second;
+         return parseError(REDEF_GATE);
+      }
       _gatelist[newPi->getVar()] = newPi;
+      _pilist.push_back(newPi);
       ++lineNo;
       colNo = 0;
    }
@@ -341,16 +342,13 @@ CirMgr::_readAIG(fstream& file) {
       if (colNo < line.size()) return parseError(MISSING_NEWLINE);
 
       CirAigGate* newAig = new CirAigGate(lit, src1, src2, lineNo + 1);
-      // for (auto g : _aiglist) if (g->getVar() == lit / 2) {
-      //    errGate = g;
-      //    return parseError(REDEF_GATE);
-      // }
-      // for (auto g : _pilist) if (g->getVar() == lit / 2) {
-      //    errGate = g;
-      //    return parseError(REDEF_GATE);
-      // }
-      _aiglist.push_back(newAig);
+      auto found = _gatelist.find(newAig->_var);
+      if (found != _gatelist.end()) {
+         errGate = found->second;
+         return parseError(REDEF_GATE);
+      }
       _gatelist[newAig->getVar()] = newAig;
+
       ++lineNo;
       colNo = 0;
    }
@@ -441,14 +439,18 @@ Circuit Statistics
 void
 CirMgr::printSummary() const
 {
+   unsigned cntAig = 0;
+   for (auto it = _gatelist.begin(), itn = _gatelist.end(); it != itn; ++it) {
+      if (it->second->_gateType == AIG_GATE) ++cntAig;
+   }
    cout << endl;
    cout << "Circuit Statistics" << endl;
    cout << "==================" << endl;
    cout << "  PI" << right << setw(12) << _pilist.size() << endl;
    cout << "  PO" << right << setw(12) << _polist.size() << endl;
-   cout << "  AIG" << right << setw(11) << _aiglist.size() << endl;
+   cout << "  AIG" << right << setw(11) << cntAig << endl;
    cout << "------------------" << endl;
-   cout << "  Total" << right << setw(9) << _pilist.size() + _polist.size() + _aiglist.size() << endl;
+   cout << "  Total" << right << setw(9) << _pilist.size() + _polist.size() + cntAig << endl;
 }
 
 void
@@ -656,7 +658,7 @@ void
 CirMgr::reset() {
    _pilist.clear();
    _polist.clear();
-   _aiglist.clear();
+   // _aiglist.clear();
    _dfslist.clear();
    _dfsSet.clear();
 

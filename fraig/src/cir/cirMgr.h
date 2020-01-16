@@ -104,7 +104,6 @@ private:
 
   vector<CirPiGate*> _pilist;
   vector<CirPoGate*> _polist;
-  vector<CirAigGate*> _aiglist;
   vector<CirGate*> _dfslist;
   map<unsigned, CirGate*> _gatelist;
   vector<CirGate*> _gdfslist;

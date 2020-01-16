@@ -98,15 +98,6 @@ void CirMgr::_removeGate(unsigned var, map<unsigned, CirGate*>::iterator* mapIt)
       else ++it;
     }
   }
-  // remove g from aiglist
-  if (g->getType() == AIG_GATE) {
-    for (vector<CirAigGate*>::iterator it = _aiglist.begin(); it != _aiglist.end();) {
-      if (*it == g) {
-        _aiglist.erase(it);
-      }
-      else ++it;
-    }
-  }
   // remove g in _gatelist
   if (mapIt != NULL) *mapIt = _gatelist.erase(*mapIt);
   else _gatelist.erase(var); 

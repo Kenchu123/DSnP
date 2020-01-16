@@ -89,7 +89,6 @@ CirMgr::fraig()
     assert(g != 0);
     // push g's fanout to queueu (BFS)
     for (auto outV : g->_fanout) {
-      // if (_fecToMerge.count(outV._gate->_fecGrp) == 0)
       if (outV._gate->_gateType == AIG_GATE && inQue.count(outV._gate->_var) == 0) {
         fgQue.push(outV._gate->_var);
         inQue.insert(outV._gate->_var);
